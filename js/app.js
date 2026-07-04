@@ -37,6 +37,7 @@ function initApp() {
 
 function bindEvents() {
   document.getElementById('gallery-button').addEventListener('click', openGallery);
+  document.getElementById('about-button').addEventListener('click', openAbout);
   document.getElementById('settings-button').addEventListener('click', openSettings);
 
   ui.tabs.forEach((tab) => {
@@ -76,6 +77,12 @@ function bindEvents() {
 
       if (state.activeView === 'gallery') {
         closeGallery();
+        return;
+      }
+
+      if (state.activeView === 'about') {
+        state.activeView = 'path';
+        render(state);
         return;
       }
 
@@ -165,6 +172,11 @@ function startBombRush(script) {
   const questions = buildBombRushQuestions(script, scriptProgress);
   state.quiz = createQuizState(null, null, questions, 'bomb_rush');
   state.activeView = 'quiz';
+  render(state);
+}
+
+function openAbout() {
+  state.activeView = 'about';
   render(state);
 }
 

@@ -51,7 +51,42 @@ function render(state) {
     return;
   }
 
+  if (state.activeView === 'about') {
+    renderAboutPage(state);
+    return;
+  }
+
   renderPath(state);
+}
+
+function renderAboutPage(state) {
+  const aboutPage = document.createElement('section');
+  aboutPage.className = 'about-page';
+
+  const backButton = document.createElement('button');
+  backButton.type = 'button';
+  backButton.className = 'about-back-button';
+  backButton.textContent = 'Back to lessons';
+  backButton.addEventListener('click', () => {
+    state.activeView = 'path';
+    render(state);
+  });
+  aboutPage.appendChild(backButton);
+
+  const card = document.createElement('div');
+  card.className = 'about-card';
+  card.innerHTML = `
+    <h1>HammyKana</h1>
+    <p>Lead Dev: Tate Singleton</p>
+    <p>Hamster: Cookie</p>
+    <p>Person who named the hamster: Hannah Kas</p>
+    <p>SFX: Stardew Valley</p>
+    <p>Special Thanks: idk</p>
+    <p class="about-thanks">Thank you for learning with HammyKana!</p>
+  `;
+  aboutPage.appendChild(card);
+
+  ui.app.appendChild(aboutPage);
 }
 
 function renderPath(state) {
