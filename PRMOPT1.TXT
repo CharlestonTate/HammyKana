@@ -1,0 +1,26 @@
+HIRIGANA + KATAKANA APPLICATION FOR LEARNING
+STACK: HTML CSS JS
+LIBS: USE SOUND PRELOADING FOR PLAYING AUDIO FILES
+STYLE: JUST A WHITE BACKGROUND WITH BLACK EVERYTHING(TEXT, TEXTBOXES, KANA, EVERYTHING)
+
+KEEP EFFECTS TO A MINIMUM
+
+PUT A SETTINGS MENU IN THE TOP RIGHT CORNER WHERE YOU CAN SET THINGS LIKE MUSIC VOLUME SFX VOLUME AND ROMANJi 
+
+ALWAYS REFER TO STYLEGUIDE.TXT IN EVERY SINGLE PROMPT/TIME YOU START EDITTING, THANK YOU
+
+
+Overview:
+This web app is very simple, all progress with be saved to local storage, it's about learning hiragana and katakana
+
+each lesson group, you will learn roughly 5 new characters, the first couple lessons in the lesson group, you will learn to recognize each individual characters, by the end of the lesson group, you will be spelling out simple words using those words.
+
+As you go to future lesson groups, you will use the kana you learned in lesson groups prior that you will use to build out words in future lessons, you must complete every single question before moving to the next lesson btw. 
+
+The entire UX will be white background, black everything for now. But the layout and buttons will all be basically duolingo. 
+
+I'm thinking of putting 10 lessons per lesson group, the first five you will be mastering the actual kana itself, recognizing it all that jazz, then the last 5 are you building out words with the kana you've obtained thus far. Anytime you master a lesson group, make that lesson group in the main ui gold like duolingo and more than that, please add all of it to a gallery which you can view via a button in the top left corner, thank you for all of this.
+
+at the top, have two tabs, the first tab is hiragana, the second will be katakana, you can view both, both will have separate galleries.
+
+More will come soon in the future, but for now, this is the vision, make this simple at first then we will add more things, thank you earnestly.

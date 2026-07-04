@@ -1,0 +1,322 @@
+STYLEGUIDE.txt
+Goal
+
+Write clean, readable, beginner-friendly code.
+
+Optimize for maintainability and clarity over cleverness.
+
+Every file should be understandable after months away from the project.
+
+General Rules
+Use plain HTML, CSS, and JavaScript.
+Do not introduce frameworks.
+Do not introduce build tools.
+Do not introduce npm packages unless explicitly requested.
+Do not over-engineer solutions.
+Prefer simple code over abstract code.
+JavaScript
+Formatting
+Use const by default.
+Use let only when reassignment is necessary.
+Never use var.
+Use semicolons consistently.
+Use single quotes for strings unless template literals are required.
+Use template literals only when interpolation is needed.
+
+Example:
+
+const answer = 'yes';
+
+let score = 0;
+
+score++;
+Functions
+
+Functions should do one thing.
+
+Avoid functions longer than roughly 30 lines.
+
+If a function becomes difficult to explain, split it.
+
+Prefer:
+
+showQuestion();
+checkAnswer();
+updateProgress();
+
+instead of:
+
+handleEntireQuizFlow();
+Naming
+
+Names should describe intent.
+
+Good
+
+currentLesson
+currentKana
+reviewQueue
+masteryLevel
+
+Bad
+
+data
+temp
+obj
+x
+value2
+State
+
+Keep application state in one place.
+
+Avoid hidden state.
+
+Example:
+
+const state = {
+    lesson: 1,
+    score: 0,
+    streak: 0,
+    currentKana: null
+};
+DOM
+
+Cache DOM elements.
+
+Example:
+
+const questionElement =
+    document.getElementById('question');
+
+Avoid repeatedly querying the DOM.
+
+Never build HTML using large template strings when simple DOM manipulation is clearer.
+
+Avoid inline event handlers.
+
+Good
+
+button.addEventListener(...)
+
+Bad
+
+<button onclick="...">
+
+Separate logic from rendering.
+
+Good
+
+updateState()
+
+↓
+
+render()
+
+Bad
+
+updateState()
+
+↓
+
+change random DOM elements everywhere
+Project Structure
+
+Keep folders shallow.
+
+Example
+
+/
+    index.html
+
+    css/
+        styles.css
+
+    js/
+        app.js
+        lessons.js
+        quiz.js
+        ui.js
+        storage.js
+
+    data/
+        hiragana.js
+        katakana.js
+
+    assets/
+
+Avoid deeply nested folders.
+
+CSS
+
+Use classes whenever possible.
+
+Avoid styling IDs.
+
+Example
+
+.lesson-card
+.answer-button
+.progress-bar
+
+Keep selectors simple.
+
+Good
+
+.answer-button
+
+Avoid
+
+.quiz .container .buttons button
+
+Avoid !important.
+
+Fix specificity instead.
+
+Use CSS variables.
+
+Example
+
+:root {
+    --primary;
+    --secondary;
+    --background;
+    --text;
+    --border-radius;
+}
+
+Keep spacing consistent.
+
+Use an 8px spacing system.
+
+Example
+
+8
+16
+24
+32
+40
+48
+HTML
+
+Use semantic elements.
+
+Prefer
+
+<header>
+<main>
+<section>
+<footer>
+
+instead of excessive div nesting.
+
+Every button should actually be a <button>.
+
+Do not use clickable divs.
+
+Forms should use labels.
+
+Images should always include alt text.
+
+Data
+
+Kana should be stored as objects.
+
+Example
+
+{
+    kana: 'あ',
+    romaji: 'a',
+    group: 0
+}
+
+Lesson groups store an index and a kana array. Display the group title by joining the kana array.
+
+Do not duplicate data.
+
+Comments
+
+Write comments only when explaining why.
+
+Do not comment obvious code.
+
+Good
+
+// Review queue favors incorrectly answered kana.
+
+Bad
+
+// Increment score.
+score++;
+Error Handling
+
+Fail gracefully.
+
+Never silently ignore errors.
+
+Provide meaningful console messages during development.
+
+Reusability
+
+If code is copied three times, create a reusable function.
+
+Do not prematurely abstract.
+
+Performance
+
+Do not optimize prematurely.
+
+Prioritize readability first.
+
+Avoid unnecessary DOM updates.
+
+Only render what changed.
+
+User Experience
+
+Animations should feel responsive.
+
+Avoid long delays.
+
+Buttons should provide immediate visual feedback.
+
+Never lock the interface while processing.
+
+HammyKana UX Conventions
+
+Lesson group titles display the kana being learned (for example あいうえお), not row names like Vowels or K-row.
+
+Lesson groups stay locked until every lesson in the previous group is complete.
+
+Quiz questions show romaji as the prompt and kana as the answer choices.
+
+During a lesson, hide the main header. Show an X button in the top-left that asks for confirmation before quitting.
+
+The gallery is a full page view, not a modal overlay.
+
+Settings may remain a modal.
+
+Accessibility
+
+Interactive elements must be keyboard accessible.
+
+Maintain sufficient color contrast.
+
+Use visible focus states.
+
+Avoid relying solely on color to convey meaning.
+
+AI Coding Rules
+
+When generating code:
+
+Preserve the existing project architecture.
+Do not rewrite unrelated files.
+Modify only what is necessary.
+Keep functions small and focused.
+Explain architectural decisions before making major changes.
+Ask before introducing new libraries or dependencies.
+Prefer readability over cleverness.
+Generate production-quality code, not prototypes.
+Match the existing naming conventions and formatting.
+Avoid unnecessary abstractions and design patterns.
+Leave the codebase cleaner than it was found.
