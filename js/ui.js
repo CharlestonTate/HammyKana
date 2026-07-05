@@ -81,7 +81,8 @@ function renderAboutPage(state) {
     <p>Hamster: Cookie</p>
     <p>Person who named the hamster: Hannah Kas</p>
     <p>SFX: Stardew Valley</p>
-    <p>Special Thanks: idk</p>
+    <p>Special Thanks: Grant Roos and Braden. Also my mom.</p>
+    <p>Psalm 55</p>
     <p class="about-thanks">Thank you for learning with HammyKana!</p>
   `;
   aboutPage.appendChild(card);
