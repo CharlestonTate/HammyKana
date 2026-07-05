@@ -132,7 +132,7 @@ const WORDS = {
     { kana: 'はるやすみ', romaji: 'haruyasumi', meaning: 'spring vacation', requiredGroup: 8 },
     { kana: 'おかあさん', romaji: 'okaasan', meaning: 'mother', requiredGroup: 9 },
     { kana: 'おとうさん', romaji: 'otousan', meaning: 'father', requiredGroup: 9 },
-    { kana: 'くうこう', romaji: 'kuukou', meaning: 'airport', requiredGroup: 1 },
+    { kana: 'くうこ', romaji: 'kuuko', meaning: 'airport', requiredGroup: 1 },
     { kana: 'ひこうき', romaji: 'hikouki', meaning: 'airplane', requiredGroup: 5 },
     { kana: 'にわとり', romaji: 'niwatori', meaning: 'chicken', requiredGroup: 8 },
     { kana: 'すいえい', romaji: 'suiei', meaning: 'swimming', requiredGroup: 2 },
