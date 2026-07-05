@@ -84,7 +84,7 @@ function renderAboutPage(state) {
     <p>Special Thanks: Grant Roos and Braden. Also my mom.</p>
     <p>Psalm 55</p>
     <p class="about-thanks">Thank you for learning with HammyKana!</p>
-    <p class="about-thanks">This projec will always be free.</p>
+    <p class="about-thanks">This project will always be free.</p>
   `;
   aboutPage.appendChild(card);
 
