@@ -1,3 +1,5 @@
+// Builds quiz question sets: kana recognition, word spelling/typing, and Bomb Rush pools.
+
 const KANA_QUESTION_COUNT = 8;
 const WORD_QUESTION_COUNT = 8;
 
@@ -47,7 +49,7 @@ function getWordsForGroup(script, groupIndex) {
   return WORDS[script].filter((word) => word.requiredGroup === groupIndex);
 }
 
-function buildKanaToRomajiQuestion(kanaEntry, distractors) {
+function buildKanaToRomajiQuestion(kanaEntry, distractors, script) {
   const options = shuffleArray([kanaEntry.romaji, ...distractors.map((d) => d.romaji)]);
 
   return {
@@ -55,6 +57,7 @@ function buildKanaToRomajiQuestion(kanaEntry, distractors) {
     prompt: kanaEntry.kana,
     answer: kanaEntry.romaji,
     options,
+    script,
     requeued: false
   };
 }
@@ -82,22 +85,23 @@ function buildKanaQuestions(script, groupIndex) {
 
   return sampleKana.map((kanaEntry) => {
     const distractors = pickDistractors(script, groupIndex, kanaEntry, 3);
-    return buildKanaToRomajiQuestion(kanaEntry, distractors);
+    return buildKanaToRomajiQuestion(kanaEntry, distractors, script);
   });
 }
 
-function buildWordSpellingQuestion(word) {
+function buildWordSpellingQuestion(word, script) {
   return {
     type: 'word_spelling',
     prompt: word.kana,
     answer: word.romaji,
     guess: '',
     meaning: word.meaning,
+    script,
     requeued: false
   };
 }
 
-function buildRomajiToKanaQuestion(word) {
+function buildRomajiToKanaQuestion(word, script) {
   return {
     type: 'romaji_to_kana',
     prompt: makeSpacedRomaji(word.romaji),
@@ -105,6 +109,7 @@ function buildRomajiToKanaQuestion(word) {
     guess: '',
     meaning: word.meaning,
     groupIndex: word.requiredGroup,
+    script,
     requeued: false
   };
 }
@@ -119,8 +124,8 @@ function buildWordQuestions(script, groupIndex, lessonIndex) {
     sampleWords.map((word) => {
       const useKanaKeyboard = Math.random() < 0.4;
       return useKanaKeyboard
-        ? buildRomajiToKanaQuestion(word)
-        : buildWordSpellingQuestion(word);
+        ? buildRomajiToKanaQuestion(word, script)
+        : buildWordSpellingQuestion(word, script);
     })
   );
 }
@@ -133,39 +138,69 @@ function buildQuestions(script, groupIndex, lessonIndex) {
   return buildWordQuestions(script, groupIndex, lessonIndex);
 }
 
-function getBombRushMaxGroup(scriptProgress) {
-  const currentLesson = getCurrentLesson(scriptProgress);
-  return currentLesson.groupIndex;
+const BOMB_RUSH_MIN_QUESTIONS = 200;
+
+function getBombRushScripts(scriptFilter) {
+  if (scriptFilter === 'hiragana' || scriptFilter === 'katakana') {
+    return [scriptFilter];
+  }
+
+  return ['hiragana', 'katakana'];
 }
 
-function buildBombRushQuestions(script, scriptProgress) {
+function buildBombRushPoolForScript(script, scriptProgress) {
   const masteredKana = getMasteredKana(script, scriptProgress);
   const maxMasteredGroup = masteredKana.reduce(
     (groupIndex, entry) => Math.max(groupIndex, entry.group),
     -1
   );
 
-  if (masteredKana.length === 0) {
-    return [];
-  }
-
   const kanaQuestions = masteredKana.map((kanaEntry) => {
     const distractors = pickDistractors(script, kanaEntry.group, kanaEntry, 3);
-    return buildKanaToRomajiQuestion(kanaEntry, distractors);
+    return buildKanaToRomajiQuestion(kanaEntry, distractors, script);
   });
 
-  const availableWords = WORDS[script].filter(
-    (word) => word.requiredGroup <= maxMasteredGroup
-  );
+  const availableWords = WORDS[script].filter((word) => word.requiredGroup <= maxMasteredGroup);
   const wordQuestions = availableWords.map((word) => {
     const useKanaKeyboard = Math.random() < 0.5;
     return useKanaKeyboard
-      ? buildRomajiToKanaQuestion(word)
-      : buildWordSpellingQuestion(word);
+      ? buildRomajiToKanaQuestion(word, script)
+      : buildWordSpellingQuestion(word, script);
   });
 
-  const questions = [...kanaQuestions, ...wordQuestions];
-  return shuffleArray(questions);
+  return { kanaQuestions, wordQuestions };
+}
+
+function buildBombRushQuestions(filters, progress) {
+  const scripts = getBombRushScripts(filters.script);
+  let kanaQuestions = [];
+  let wordQuestions = [];
+
+  scripts.forEach((script) => {
+    const pool = buildBombRushPoolForScript(script, progress[script]);
+    kanaQuestions = kanaQuestions.concat(pool.kanaQuestions);
+    wordQuestions = wordQuestions.concat(pool.wordQuestions);
+  });
+
+  let basePool;
+  if (filters.questionType === 'kana') {
+    basePool = kanaQuestions;
+  } else if (filters.questionType === 'typing') {
+    basePool = wordQuestions;
+  } else {
+    basePool = kanaQuestions.concat(wordQuestions);
+  }
+
+  if (basePool.length === 0) {
+    return [];
+  }
+
+  let questions = [];
+  while (questions.length < BOMB_RUSH_MIN_QUESTIONS) {
+    questions = questions.concat(shuffleArray(basePool));
+  }
+
+  return questions;
 }
 
 function getAllKanaForGallery(script) {

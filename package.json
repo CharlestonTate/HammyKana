@@ -1,0 +1,14 @@
+{
+  "name": "hammykana",
+  "version": "0.7.0",
+  "private": true,
+  "description": "Hiragana and katakana learning app with Hammy the hamster.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.4.3"
+  }
+}
