@@ -1,6 +1,8 @@
+// localStorage persistence: progress shape, unlock/mastery rules, and JSON backup import/export.
+
 const STORAGE_KEY = 'hammyKana_v1';
 const EXPORT_FORMAT_VERSION = 1;
-const GROUP_COUNT = 10;
+const GROUP_COUNT = 26;
 const LESSONS_PER_GROUP = 10;
 
 function createDefaultScriptProgress() {
@@ -107,6 +109,7 @@ function parseImportedProgress(raw) {
     throw new Error('Invalid progress file.');
   }
 
+  // Accepts our own export format, an older { data: {...} } wrapper, or a bare progress object.
   const payload = raw.app === 'HammyKana' ? raw : raw.data && raw.data.hiragana ? raw.data : raw;
 
   if (!payload.hiragana || !payload.katakana) {
