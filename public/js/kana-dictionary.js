@@ -205,7 +205,7 @@ const kanaDictionary = {
 
     return {
       script,
-      entries: getAvailableKana(script, availableGroup)
+      entries: getTypableKana(script, availableGroup)
     };
   },
 

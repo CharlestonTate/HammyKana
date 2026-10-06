@@ -7,16 +7,26 @@ function appendKanaToGuess(question, kanaChar) {
 
   question.guess = (question.guess || '') + kanaChar;
   question.romajiBuffer = '';
+  question.romajiTyped = '';
   question.romajiCandidateIndex = 0;
 }
 
+function getRomajiTargetKana(question) {
+  return question.type === 'romaji_to_kana' ? question.answer : undefined;
+}
+
 function applyRomajiBackspace(question) {
+  const script = question.script;
   const result = processRomajiBackspace({
     buffer: question.romajiBuffer || '',
-    guess: question.guess || ''
+    guess: question.guess || '',
+    romajiTyped: question.romajiTyped || '',
+    script,
+    targetKana: getRomajiTargetKana(question)
   });
   question.romajiBuffer = result.buffer;
   question.guess = result.guess;
+  question.romajiTyped = result.romajiTyped || '';
   question.romajiCandidateIndex = 0;
 }
 
@@ -36,10 +46,13 @@ function applyRomajiCandidateToQuestion(question, candidateKana, script) {
     buffer: question.romajiBuffer || '',
     guess: question.guess || '',
     candidateKana,
-    script
+    script,
+    romajiTyped: question.romajiTyped || '',
+    targetKana: getRomajiTargetKana(question)
   });
   question.romajiBuffer = result.buffer;
   question.guess = result.guess;
+  question.romajiTyped = result.romajiTyped || '';
   question.romajiCandidateIndex = 0;
 }
 
@@ -49,7 +62,7 @@ function getRomajiCandidateList(question, script) {
     return [];
   }
 
-  return getRomajiCandidates(buffer, script);
+  return getRomajiCandidates(buffer, script, question.guess || '');
 }
 
 function syncRomajiCandidateIndex(question, candidates) {
@@ -223,7 +236,9 @@ function handleRomajiKanaTyping(event, state, question) {
       const finalized = finalizeRomajiInput({
         buffer: question.romajiBuffer || '',
         guess: question.guess || '',
-        script
+        script,
+        romajiTyped: question.romajiTyped || '',
+        targetKana: getRomajiTargetKana(question)
       });
       question.romajiBuffer = finalized.buffer;
       question.guess = finalized.guess;
@@ -252,10 +267,13 @@ function handleRomajiKanaTyping(event, state, question) {
     buffer: question.romajiBuffer || '',
     guess: question.guess || '',
     key: letter,
-    script
+    script,
+    romajiTyped: question.romajiTyped || '',
+    targetKana: getRomajiTargetKana(question)
   });
   question.romajiBuffer = result.buffer;
   question.guess = result.guess;
+  question.romajiTyped = result.romajiTyped || '';
   question.romajiCandidateIndex = 0;
   render(state);
 }
@@ -415,7 +433,9 @@ function renderSpellingQuestion(container, state, question) {
         const finalized = finalizeRomajiInput({
           buffer: question.romajiBuffer || '',
           guess: question.guess || '',
-          script: question.script || state.activeScript
+          script: question.script || state.activeScript,
+          romajiTyped: question.romajiTyped || '',
+          targetKana: getRomajiTargetKana(question)
         });
         question.romajiBuffer = finalized.buffer;
         question.guess = finalized.guess;

@@ -61,6 +61,7 @@ const KATAKANA = [
   { kana: 'ツ', romaji: 'tsu', group: 3 },
   { kana: 'テ', romaji: 'te', group: 3 },
   { kana: 'ト', romaji: 'to', group: 3 },
+  { kana: 'ッ', romaji: 'xtu', group: 3 },
 
   // group 4 — ナニヌネノ
   { kana: 'ナ', romaji: 'na', group: 4 },
@@ -138,6 +139,7 @@ const KATAKANA = [
   { kana: 'プ', romaji: 'pu', group: 14 },
   { kana: 'ペ', romaji: 'pe', group: 14 },
   { kana: 'ポ', romaji: 'po', group: 14 },
+  { kana: 'ー', romaji: 'prolong', group: 14 },
 
   // ----- stage 4: combination kana -----
 

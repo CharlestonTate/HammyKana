@@ -87,6 +87,7 @@ const hammy = (function () {
     image.src = src;
   }
 
+  // unused for now
   function updateBubble(text) {
     const bubble = document.getElementById('hammy-message');
     const shell = document.querySelector('.hammy-shell');

@@ -42,6 +42,10 @@ function buildRomajiMap(entries, script) {
   map.xtu = sokuon;
   map.ltu = sokuon;
 
+  const choonpu = script === 'katakana' ? 'ー' : 'ー';
+  map.prolong = choonpu;
+  map['-'] = choonpu;
+
   return map;
 }
 
@@ -64,6 +68,10 @@ function getRomajiMaps(script) {
   return { map: hiraganaRomajiMap, keys: hiraganaKeysSorted };
 }
 
+function getScriptEntries(script) {
+  return script === 'katakana' ? KATAKANA : HIRAGANA;
+}
+
 function getNKana(script) {
   return script === 'katakana' ? 'ン' : 'ん';
 }
@@ -72,17 +80,73 @@ function getSokuon(script) {
   return script === 'katakana' ? 'ッ' : 'っ';
 }
 
-function consumeOneSyllable(remaining, script) {
-  const { map, keys } = getRomajiMaps(script);
-  const sokuon = getSokuon(script);
-  const nKana = getNKana(script);
+function getChoonpu(script) {
+  return getRomajiMaps(script).map.prolong;
+}
 
-  if (!remaining) {
+function getVowelKana(vowel, script) {
+  return getRomajiMaps(script).map[vowel];
+}
+
+function segmentKanaString(kanaString, script) {
+  const entries = getScriptEntries(script).slice().sort((a, b) => b.kana.length - a.kana.length);
+  const segments = [];
+  let index = 0;
+
+  while (index < kanaString.length) {
+    let matched = null;
+
+    for (let i = 0; i < entries.length; i += 1) {
+      const entry = entries[i];
+      if (kanaString.startsWith(entry.kana, index)) {
+        matched = entry;
+        break;
+      }
+    }
+
+    if (!matched) {
+      return null;
+    }
+
+    segments.push(matched);
+    index += matched.kana.length;
+  }
+
+  return segments;
+}
+
+function getLastSegmentVowel(kanaString, script) {
+  const segments = segmentKanaString(kanaString, script);
+  if (!segments || segments.length === 0) {
     return null;
   }
 
+  const lastRomaji = segments[segments.length - 1].romaji;
+  return lastRomaji[lastRomaji.length - 1];
+}
+
+function listConsumeSteps(remaining, script, committedKana) {
+  const { map, keys } = getRomajiMaps(script);
+  const sokuon = getSokuon(script);
+  const nKana = getNKana(script);
+  const choonpu = getChoonpu(script);
+  const steps = [];
+  const seen = new Set();
+
+  function addStep(kana, rest) {
+    const key = `${kana}\0${rest}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      steps.push({ kana, rest });
+    }
+  }
+
+  if (!remaining) {
+    return steps;
+  }
+
   if (remaining.startsWith('xtu') || remaining.startsWith('ltu')) {
-    return { kana: sokuon, rest: remaining.slice(3) };
+    addStep(sokuon, remaining.slice(3));
   }
 
   if (
@@ -91,49 +155,168 @@ function consumeOneSyllable(remaining, script) {
     isRomajiConsonant(remaining[0]) &&
     remaining[0] !== 'n'
   ) {
-    return { kana: sokuon, rest: remaining.slice(1) };
+    addStep(sokuon, remaining.slice(1));
   }
 
   if (remaining[0] === 'n') {
     if (remaining.length === 1) {
-      return null;
+      return steps;
     }
 
     if (remaining[1] === 'n') {
-      return { kana: nKana, rest: remaining.slice(2) };
-    }
-
-    if (remaining[1] === '\'') {
-      return { kana: nKana, rest: remaining.slice(2) };
-    }
-
-    const next = remaining[1];
-    if (isRomajiConsonant(next) && next !== 'y') {
-      return { kana: nKana, rest: remaining.slice(1) };
+      addStep(nKana, remaining.slice(2));
+    } else if (remaining[1] === '\'') {
+      addStep(nKana, remaining.slice(2));
+    } else {
+      const next = remaining[1];
+      if (isRomajiConsonant(next) && next !== 'y') {
+        addStep(nKana, remaining.slice(1));
+      }
     }
   }
 
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     if (remaining.startsWith(key)) {
-      return { kana: map[key], rest: remaining.slice(key.length) };
+      addStep(map[key], remaining.slice(key.length));
     }
   }
 
-  return null;
+  if (remaining.length >= 1 && ROMAJI_VOWELS.includes(remaining[0])) {
+    const vowel = remaining[0];
+    const vowelKana = getVowelKana(vowel, script);
+
+    if (vowelKana) {
+      const lastVowel = getLastSegmentVowel(committedKana, script);
+      if (lastVowel === vowel) {
+        addStep(choonpu, remaining.slice(1));
+      }
+    }
+  }
+
+  return steps;
 }
 
-function flushRomajiConvert(buffer, script) {
+function collectRomajiParses(romaji, script) {
+  const normalized = String(romaji || '').toLowerCase();
+  const results = [];
+
+  function walk(remaining, committedKana) {
+    if (remaining === '') {
+      results.push(committedKana);
+      return;
+    }
+
+    const steps = listConsumeSteps(remaining, script, committedKana);
+    if (steps.length === 0) {
+      if (remaining === 'n') {
+        results.push(committedKana + getNKana(script));
+      }
+      return;
+    }
+
+    steps.forEach((step) => {
+      walk(step.rest, committedKana + step.kana);
+    });
+  }
+
+  walk(normalized, '');
+  return results;
+}
+
+function pickBestParse(parses, targetKana) {
+  if (parses.length === 0) {
+    return '';
+  }
+
+  if (targetKana) {
+    const exact = parses.filter((parse) => parse === targetKana);
+    if (exact.length > 0) {
+      return exact[0];
+    }
+
+    const targetHasChoonpu = targetKana.includes('ー');
+    const filtered = targetHasChoonpu
+      ? parses.filter((parse) => parse.includes('ー'))
+      : parses.filter((parse) => !parse.includes('ー'));
+
+    if (filtered.length > 0) {
+      const prefixMatches = filtered.filter((parse) => targetKana.startsWith(parse));
+      if (prefixMatches.length > 0) {
+        return prefixMatches.sort((a, b) => b.length - a.length)[0];
+      }
+    }
+
+    const prefixMatches = parses.filter((parse) => targetKana.startsWith(parse));
+    if (prefixMatches.length > 0) {
+      return prefixMatches.sort((a, b) => b.length - a.length)[0];
+    }
+  }
+
+  if (parses.length === 1) {
+    return parses[0];
+  }
+
+  return parses.sort((a, b) => b.length - a.length)[0];
+}
+
+function romajiStringToKana(romaji, script, targetKana) {
+  const parses = collectRomajiParses(romaji, script);
+  return pickBestParse(parses, targetKana);
+}
+
+function romajiToKanaState(romaji, script, targetKana) {
+  const normalized = String(romaji || '').toLowerCase();
+  let bestGuess = '';
+  let bestLength = 0;
+
+  for (let length = 1; length <= normalized.length; length += 1) {
+    const prefix = normalized.slice(0, length);
+    const parse = pickBestParse(collectRomajiParses(prefix, script), targetKana);
+
+    if (!parse) {
+      continue;
+    }
+
+    if (targetKana) {
+      if (targetKana.startsWith(parse)) {
+        bestGuess = parse;
+        bestLength = length;
+      }
+    } else {
+      bestGuess = parse;
+      bestLength = length;
+    }
+  }
+
+  return {
+    guess: bestGuess,
+    buffer: normalized.slice(bestLength)
+  };
+}
+
+function consumeOneSyllable(remaining, script, committedKana) {
+  const steps = listConsumeSteps(remaining, script, committedKana || '');
+  if (steps.length === 0) {
+    return null;
+  }
+
+  return steps[0];
+}
+
+function flushRomajiConvert(buffer, script, committedKana) {
   let committed = '';
   let remaining = buffer;
+  let currentKana = committedKana || '';
 
   while (remaining.length > 0) {
-    const step = consumeOneSyllable(remaining, script);
+    const step = consumeOneSyllable(remaining, script, currentKana);
     if (!step) {
       break;
     }
 
     committed += step.kana;
+    currentKana += step.kana;
     remaining = step.rest;
   }
 
@@ -151,37 +334,51 @@ function flushTrailingN(buffer, guess, script) {
   };
 }
 
-function processRomajiInput({ buffer, guess, key, script }) {
+function processRomajiInput({ buffer, guess, key, script, targetKana, romajiTyped }) {
   const letter = String(key || '').toLowerCase();
 
   if (!letter.match(/^[a-z]$/)) {
-    return { buffer, guess };
+    return { buffer, guess, romajiTyped: romajiTyped || '' };
   }
 
-  const combined = buffer + letter;
-  const converted = flushRomajiConvert(combined, script);
+  const combinedRomaji = (romajiTyped ?? buffer) + letter;
+  const state = romajiToKanaState(combinedRomaji, script, targetKana);
 
   return {
-    buffer: converted.buffer,
-    guess: guess + converted.committed
+    buffer: state.buffer,
+    guess: state.guess,
+    romajiTyped: combinedRomaji
   };
 }
 
-function processRomajiBackspace({ buffer, guess }) {
+function processRomajiBackspace({ buffer, guess, romajiTyped, script, targetKana }) {
+  if (romajiTyped && romajiTyped.length > 0) {
+    const nextTyped = romajiTyped.slice(0, -1);
+    const state = romajiToKanaState(nextTyped, script, targetKana);
+
+    return {
+      romajiTyped: nextTyped,
+      buffer: state.buffer,
+      guess: state.guess
+    };
+  }
+
   if (buffer.length > 0) {
     return {
       buffer: buffer.slice(0, -1),
-      guess
+      guess,
+      romajiTyped: romajiTyped || ''
     };
   }
 
   if (guess.length === 0) {
-    return { buffer, guess };
+    return { buffer, guess, romajiTyped: romajiTyped || '' };
   }
 
   return {
     buffer: '',
-    guess: [...guess].slice(0, -1).join('')
+    guess: [...guess].slice(0, -1).join(''),
+    romajiTyped: romajiTyped || ''
   };
 }
 
@@ -189,7 +386,7 @@ function isRomajiInputComplete({ buffer, guess }) {
   return buffer === '' && guess.length > 0;
 }
 
-function getRomajiCandidates(buffer, script) {
+function getRomajiCandidates(buffer, script, guess) {
   if (!buffer) {
     return [];
   }
@@ -197,6 +394,7 @@ function getRomajiCandidates(buffer, script) {
   const { map, keys } = getRomajiMaps(script);
   const sokuon = getSokuon(script);
   const nKana = getNKana(script);
+  const choonpu = getChoonpu(script);
   const seen = new Set();
   const candidates = [];
 
@@ -207,10 +405,9 @@ function getRomajiCandidates(buffer, script) {
     }
   }
 
-  const flushed = flushRomajiConvert(buffer, script);
-  if (flushed.committed) {
-    add(flushed.committed);
-  }
+  listConsumeSteps(buffer, script, guess || '').forEach((step) => {
+    add(step.kana);
+  });
 
   keys.forEach((key) => {
     if (key.startsWith(buffer)) {
@@ -231,14 +428,25 @@ function getRomajiCandidates(buffer, script) {
     add(sokuon);
   }
 
+  if (buffer.length === 1 && ROMAJI_VOWELS.includes(buffer[0])) {
+    const lastVowel = getLastSegmentVowel(guess || '', script);
+    if (lastVowel === buffer[0]) {
+      add(choonpu);
+    }
+  }
+
   return candidates.slice(0, 9);
 }
 
-function applyRomajiCandidate({ buffer, guess, candidateKana, script }) {
+function applyRomajiCandidate({ buffer, guess, candidateKana, script, romajiTyped, targetKana }) {
   const { map, keys } = getRomajiMaps(script);
 
   if (map[buffer] === candidateKana) {
-    return { guess: guess + candidateKana, buffer: '' };
+    return {
+      guess: guess + candidateKana,
+      buffer: '',
+      romajiTyped: (romajiTyped || '') + buffer
+    };
   }
 
   const prefixKeys = keys
@@ -246,23 +454,59 @@ function applyRomajiCandidate({ buffer, guess, candidateKana, script }) {
     .sort((a, b) => a.length - b.length);
 
   if (prefixKeys.length > 0) {
-    return { guess: guess + candidateKana, buffer: '' };
+    const typed = (romajiTyped || '') + prefixKeys[0];
+    const state = romajiToKanaState(typed, script, targetKana);
+    return {
+      guess: state.guess,
+      buffer: state.buffer,
+      romajiTyped: typed
+    };
   }
 
-  const flushed = flushRomajiConvert(buffer, script);
+  const flushed = flushRomajiConvert(buffer, script, guess);
   if (flushed.committed === candidateKana) {
-    return { guess: guess + flushed.committed, buffer: flushed.buffer };
+    return {
+      guess: guess + flushed.committed,
+      buffer: flushed.buffer,
+      romajiTyped: (romajiTyped || '') + buffer.slice(0, buffer.length - flushed.buffer.length)
+    };
   }
 
-  return { guess: guess + candidateKana, buffer: '' };
+  return {
+    guess: guess + candidateKana,
+    buffer: '',
+    romajiTyped: romajiTyped || ''
+  };
 }
 
-function finalizeRomajiInput({ buffer, guess, script }) {
+function finalizeRomajiInput({ buffer, guess, script, targetKana, romajiTyped }) {
+  if (romajiTyped !== undefined && romajiTyped !== null && romajiTyped !== '') {
+    return {
+      buffer: '',
+      guess: romajiStringToKana(romajiTyped, script, targetKana)
+    };
+  }
+
   const flushed = flushTrailingN(buffer, guess, script);
-  const converted = flushRomajiConvert(flushed.buffer, script);
+  const converted = flushRomajiConvert(flushed.buffer, script, flushed.guess);
 
   return {
     buffer: converted.buffer,
     guess: flushed.guess + converted.committed
   };
+}
+
+function verifyAllWordsRomajiRoundTrip() {
+  const failures = [];
+
+  ['hiragana', 'katakana'].forEach((script) => {
+    WORDS[script].forEach((word) => {
+      const converted = romajiStringToKana(word.romaji, script, word.kana);
+      if (converted !== word.kana) {
+        failures.push({ script, romaji: word.romaji, expected: word.kana, got: converted });
+      }
+    });
+  });
+
+  return failures;
 }

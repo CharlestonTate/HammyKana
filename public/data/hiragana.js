@@ -61,6 +61,7 @@ const HIRAGANA = [
   { kana: 'つ', romaji: 'tsu', group: 3 },
   { kana: 'て', romaji: 'te', group: 3 },
   { kana: 'と', romaji: 'to', group: 3 },
+  { kana: 'っ', romaji: 'xtu', group: 3 },
 
   // group 4 — なにぬねの
   { kana: 'な', romaji: 'na', group: 4 },
@@ -138,6 +139,7 @@ const HIRAGANA = [
   { kana: 'ぷ', romaji: 'pu', group: 14 },
   { kana: 'ぺ', romaji: 'pe', group: 14 },
   { kana: 'ぽ', romaji: 'po', group: 14 },
+  { kana: 'ー', romaji: 'prolong', group: 14 },
 
   // ----- stage 4: combination kana (small ゃゅょ) -----
 

@@ -45,6 +45,64 @@ function getAvailableKana(script, maxGroupIndex) {
   return data.kana.filter((entry) => entry.group <= maxGroupIndex);
 }
 
+function getTypableKana(script, maxGroupIndex) {
+  return getAvailableKana(script, maxGroupIndex);
+}
+
+function getTypableCharSet(script, maxGroupIndex) {
+  const chars = new Set();
+  getTypableKana(script, maxGroupIndex).forEach((entry) => {
+    [...entry.kana].forEach((char) => chars.add(char));
+  });
+  return chars;
+}
+
+function segmentWordKana(kanaString, script) {
+  const entries = getScriptData(script).kana.slice().sort((a, b) => b.kana.length - a.kana.length);
+  const segments = [];
+  let index = 0;
+
+  while (index < kanaString.length) {
+    let matched = null;
+
+    for (let i = 0; i < entries.length; i += 1) {
+      const entry = entries[i];
+      if (kanaString.startsWith(entry.kana, index)) {
+        matched = entry;
+        break;
+      }
+    }
+
+    if (!matched) {
+      return null;
+    }
+
+    segments.push(matched);
+    index += matched.kana.length;
+  }
+
+  return segments;
+}
+
+function isWordTypableAtGroup(word, script, maxGroupIndex) {
+  const segments = segmentWordKana(word.kana, script);
+  if (!segments) {
+    return false;
+  }
+
+  const typable = new Set(getTypableKana(script, maxGroupIndex).map((entry) => entry.kana));
+  return segments.every((segment) => typable.has(segment.kana));
+}
+
+function computeWordRequiredGroup(word, script) {
+  const segments = segmentWordKana(word.kana, script);
+  if (!segments) {
+    return Infinity;
+  }
+
+  return segments.reduce((maxGroup, segment) => Math.max(maxGroup, segment.group), 0);
+}
+
 function getWordsForGroup(script, groupIndex) {
   return WORDS[script].filter((word) => word.requiredGroup === groupIndex);
 }
@@ -108,6 +166,7 @@ function buildRomajiToKanaQuestion(word, script) {
     answer: word.kana,
     guess: '',
     romajiBuffer: '',
+    romajiTyped: '',
     romajiCandidateIndex: 0,
     meaning: word.meaning,
     groupIndex: word.requiredGroup,
@@ -116,9 +175,17 @@ function buildRomajiToKanaQuestion(word, script) {
   };
 }
 
+function filterTypableWords(words, script, maxGroupIndex) {
+  return words.filter((word) => isWordTypableAtGroup(word, script, maxGroupIndex));
+}
+
 function buildWordQuestions(script, groupIndex, lessonIndex) {
-  const groupWords = getWordsForGroup(script, groupIndex);
-  const priorWords = WORDS[script].filter((word) => word.requiredGroup < groupIndex);
+  const groupWords = filterTypableWords(getWordsForGroup(script, groupIndex), script, groupIndex);
+  const priorWords = filterTypableWords(
+    WORDS[script].filter((word) => word.requiredGroup < groupIndex),
+    script,
+    groupIndex
+  );
   const wordPool = groupWords.length > 0 ? groupWords : priorWords.slice(-10);
   const sampleWords = pickRandomSample(wordPool, WORD_QUESTION_COUNT);
 
@@ -162,7 +229,11 @@ function buildBombRushPoolForScript(script, scriptProgress) {
     return buildKanaToRomajiQuestion(kanaEntry, distractors, script);
   });
 
-  const availableWords = WORDS[script].filter((word) => word.requiredGroup <= maxMasteredGroup);
+  const availableWords = filterTypableWords(
+    WORDS[script].filter((word) => word.requiredGroup <= maxMasteredGroup),
+    script,
+    maxMasteredGroup
+  );
   const wordQuestions = availableWords.map((word) => {
     const useKanaKeyboard = Math.random() < 0.5;
     return useKanaKeyboard
