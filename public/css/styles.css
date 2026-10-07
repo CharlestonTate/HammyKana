@@ -1,3 +1,5 @@
+@import url(https://db.onlinewebfonts.com/c/fb1fb17e0be5850598ac0f40e356bf77?family=DIN+Next+Rounded+LT+W01+Medium);
+
 :root {
   --bg: #ffffff;
   --text: #000000;
@@ -54,7 +56,7 @@
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: "DIN Next Rounded LT W01 Medium";
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
