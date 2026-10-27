@@ -12,7 +12,11 @@ function appendKanaToGuess(question, kanaChar) {
 }
 
 function getRomajiTargetKana(question) {
-  return question.type === 'romaji_to_kana' ? question.answer : undefined;
+  if (question.type === 'kana_typing') {
+    return question.answer;
+  }
+
+  return undefined;
 }
 
 function applyRomajiBackspace(question) {
@@ -35,6 +39,10 @@ function canSubmitRomajiKana(question) {
     buffer: question.romajiBuffer || '',
     guess: question.guess || ''
   });
+}
+
+function canSubmitDictionaryKana(question) {
+  return (question.guess || '').length > 0;
 }
 
 function getRomajiInputDisplayValue(guess, romajiBuffer) {
@@ -147,6 +155,30 @@ function renderRomajiCandidates(wrap, question, state) {
   });
 }
 
+function renderDictionaryKanaAnswerField(container, state, question, answered) {
+  const guess = question.guess || '';
+  const wrap = document.createElement('div');
+  wrap.className = 'romaji-kana-input-wrap';
+
+  const display = document.createElement('div');
+  display.className = 'kana-guess-display';
+  display.setAttribute('aria-label', 'Your kana answer');
+  display.setAttribute('aria-live', 'polite');
+
+  if (answered) {
+    display.textContent = question.selectedAnswer || guess;
+    display.classList.add(
+      question.answerStatus === 'correct' ? 'kana-guess-display-correct' : 'kana-guess-display-wrong'
+    );
+  } else {
+    display.textContent = guess;
+    display.classList.toggle('is-empty', !guess);
+  }
+
+  wrap.appendChild(display);
+  container.appendChild(wrap);
+}
+
 function renderRomajiKanaInputField(container, state, question, answered) {
   const guess = question.guess || '';
   const romajiBuffer = question.romajiBuffer || '';
@@ -188,6 +220,28 @@ function renderRomajiKanaInputField(container, state, question, answered) {
     requestAnimationFrame(() => {
       input.focus();
     });
+  }
+}
+
+function handleDictionaryKanaTyping(event, state, question) {
+  if (!question || question.answerStatus) {
+    return;
+  }
+
+  const script = question.script || state.activeScript;
+
+  if (event.key === 'Backspace') {
+    event.preventDefault();
+    question.guess = removeLastKanaSegment(question.guess || '', script);
+    render(state);
+    return;
+  }
+
+  if (event.key === 'Enter') {
+    if (canSubmitDictionaryKana(question)) {
+      event.preventDefault();
+      submitAnswer(state, question, question.guess);
+    }
   }
 }
 
@@ -289,8 +343,12 @@ function collapseKeyboard(keyboard) {
 }
 
 function getAnswerRevealParts(question) {
-  if (question.type === 'romaji_to_kana') {
-    return { kana: question.answer, romaji: question.prompt.replace(/\s+/g, '') };
+  if (question.type === 'romaji_to_kana' || question.type === 'kana_typing') {
+    const romaji =
+      question.referenceRomaji ||
+      (question.type === 'romaji_to_kana' ? question.prompt.replace(/\s+/g, '') : '');
+
+    return { kana: question.answer, romaji };
   }
 
   return { kana: question.prompt, romaji: question.answer };
@@ -317,12 +375,20 @@ function createAnswerReveal(question) {
 function renderSpellingQuestion(container, state, question) {
   const answered = question.answerStatus !== undefined;
   const isRomajiToKana = question.type === 'romaji_to_kana';
+  const isKanaTyping = question.type === 'kana_typing';
 
   if (isRomajiToKana) {
     const hint = document.createElement('p');
     hint.className = 'quiz-hint';
     hint.textContent =
-      'Type romaji (ka → か) or open the Kana Dictionary (^^ tab below) to pick kana. Use ↑↓ for suggestions, Enter to confirm.';
+      'Use the Kana Dictionary (^^ tab below) to build the word. Backspace removes the last kana; Enter submits.';
+    container.appendChild(hint);
+    renderDictionaryKanaAnswerField(container, state, question, answered);
+  } else if (isKanaTyping) {
+    const hint = document.createElement('p');
+    hint.className = 'quiz-hint';
+    hint.textContent =
+      'Type romaji to write the kana shown above. Use ↑↓ for suggestions, Enter to confirm.';
     container.appendChild(hint);
     renderRomajiKanaInputField(container, state, question, answered);
   } else {
@@ -408,6 +474,8 @@ function renderSpellingQuestion(container, state, question) {
     }
 
     if (isRomajiToKana) {
+      question.guess = removeLastKanaSegment(question.guess || '', question.script || state.activeScript);
+    } else if (isKanaTyping) {
       applyRomajiBackspace(question);
     } else {
       question.guess = question.guess.slice(0, -1);
@@ -421,14 +489,24 @@ function renderSpellingQuestion(container, state, question) {
   submitButton.className = 'keyboard-key keyboard-action';
   submitButton.textContent = 'Enter';
   submitButton.disabled = isRomajiToKana
-    ? !canSubmitRomajiKana(question) || answered
-    : question.guess.length !== question.answer.length || answered;
+    ? !canSubmitDictionaryKana(question) || answered
+    : isKanaTyping
+      ? !canSubmitRomajiKana(question) || answered
+      : question.guess.length !== question.answer.length || answered;
   submitButton.addEventListener('click', () => {
     if (answered) {
       return;
     }
 
     if (isRomajiToKana) {
+      if (canSubmitDictionaryKana(question)) {
+        submitAnswer(state, question, question.guess);
+      }
+
+      return;
+    }
+
+    if (isKanaTyping) {
       if (question.romajiBuffer) {
         const finalized = finalizeRomajiInput({
           buffer: question.romajiBuffer || '',

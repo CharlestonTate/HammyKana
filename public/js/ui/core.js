@@ -50,7 +50,11 @@ function render(state) {
 }
 
 function isTypedQuestion(question) {
-  return question.type === 'word_spelling' || question.type === 'romaji_to_kana';
+  return (
+    question.type === 'word_spelling' ||
+    question.type === 'romaji_to_kana' ||
+    question.type === 'kana_typing'
+  );
 }
 
 function isTypedAnswerWrong(question) {

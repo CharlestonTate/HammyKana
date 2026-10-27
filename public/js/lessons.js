@@ -103,6 +103,49 @@ function computeWordRequiredGroup(word, script) {
   return segments.reduce((maxGroup, segment) => Math.max(maxGroup, segment.group), 0);
 }
 
+function removeLastKanaSegment(guess, script) {
+  const segments = segmentWordKana(guess, script);
+  if (!segments || segments.length === 0) {
+    return '';
+  }
+
+  return segments
+    .slice(0, -1)
+    .map((segment) => segment.kana)
+    .join('');
+}
+
+const WORD_QUESTION_ROMAJI_TO_KANA_WEIGHT = 0.35;
+const WORD_QUESTION_KANA_TYPING_WEIGHT = 0.35;
+
+function pickWordQuestionType() {
+  const roll = Math.random();
+
+  if (roll < WORD_QUESTION_ROMAJI_TO_KANA_WEIGHT) {
+    return 'romaji_to_kana';
+  }
+
+  if (roll < WORD_QUESTION_ROMAJI_TO_KANA_WEIGHT + WORD_QUESTION_KANA_TYPING_WEIGHT) {
+    return 'kana_typing';
+  }
+
+  return 'word_spelling';
+}
+
+function buildWordQuestionFromWord(word, script) {
+  const questionType = pickWordQuestionType();
+
+  if (questionType === 'romaji_to_kana') {
+    return buildRomajiToKanaQuestion(word, script);
+  }
+
+  if (questionType === 'kana_typing') {
+    return buildKanaTypingQuestion(word, script);
+  }
+
+  return buildWordSpellingQuestion(word, script);
+}
+
 function getWordsForGroup(script, groupIndex) {
   return WORDS[script].filter((word) => word.requiredGroup === groupIndex);
 }
@@ -164,6 +207,24 @@ function buildRomajiToKanaQuestion(word, script) {
     type: 'romaji_to_kana',
     prompt: makeSpacedRomaji(word.romaji),
     answer: word.kana,
+    referenceRomaji: word.romaji,
+    guess: '',
+    romajiBuffer: '',
+    romajiTyped: '',
+    romajiCandidateIndex: 0,
+    meaning: word.meaning,
+    groupIndex: word.requiredGroup,
+    script,
+    requeued: false
+  };
+}
+
+function buildKanaTypingQuestion(word, script) {
+  return {
+    type: 'kana_typing',
+    prompt: word.kana,
+    answer: word.kana,
+    referenceRomaji: word.romaji,
     guess: '',
     romajiBuffer: '',
     romajiTyped: '',
@@ -189,14 +250,7 @@ function buildWordQuestions(script, groupIndex, lessonIndex) {
   const wordPool = groupWords.length > 0 ? groupWords : priorWords.slice(-10);
   const sampleWords = pickRandomSample(wordPool, WORD_QUESTION_COUNT);
 
-  return shuffleArray(
-    sampleWords.map((word) => {
-      const useKanaKeyboard = Math.random() < 0.4;
-      return useKanaKeyboard
-        ? buildRomajiToKanaQuestion(word, script)
-        : buildWordSpellingQuestion(word, script);
-    })
-  );
+  return shuffleArray(sampleWords.map((word) => buildWordQuestionFromWord(word, script)));
 }
 
 function buildQuestions(script, groupIndex, lessonIndex) {
@@ -234,12 +288,7 @@ function buildBombRushPoolForScript(script, scriptProgress) {
     script,
     maxMasteredGroup
   );
-  const wordQuestions = availableWords.map((word) => {
-    const useKanaKeyboard = Math.random() < 0.5;
-    return useKanaKeyboard
-      ? buildRomajiToKanaQuestion(word, script)
-      : buildWordSpellingQuestion(word, script);
-  });
+  const wordQuestions = availableWords.map((word) => buildWordQuestionFromWord(word, script));
 
   return { kanaQuestions, wordQuestions };
 }

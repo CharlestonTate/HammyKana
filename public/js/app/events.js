@@ -74,12 +74,17 @@ function handleQuizTyping(event) {
     return;
   }
 
-  if (question.type === 'romaji_to_kana') {
+  if (question.type === 'kana_typing') {
     if (event.target && event.target.classList.contains('romaji-kana-input')) {
       return;
     }
 
     handleRomajiKanaTyping(event, state, question);
+    return;
+  }
+
+  if (question.type === 'romaji_to_kana') {
+    handleDictionaryKanaTyping(event, state, question);
     return;
   }
 

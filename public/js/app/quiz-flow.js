@@ -87,7 +87,11 @@ function submitAnswer(appState, question, userAnswer) {
     }
     render(appState);
 
-    if (question.type !== 'word_spelling' && question.type !== 'romaji_to_kana') {
+    if (
+      question.type !== 'word_spelling' &&
+      question.type !== 'romaji_to_kana' &&
+      question.type !== 'kana_typing'
+    ) {
       setTimeout(() => {
         advanceQuiz(appState.quiz);
 
