@@ -391,8 +391,8 @@ function renderSpellingQuestion(container, state, question) {
   } else if (isKanaTyping) {
     const hint = document.createElement('p');
     hint.className = 'quiz-hint';
-    hint.textContent =
-      'Type romaji to write the kana shown above. Use ↑↓ for suggestions, Enter to confirm.';
+    hint.textContent = null;
+      // 'Type romaji to write the kana shown above. Use ↑↓ for suggestions, Enter to confirm.';
     container.appendChild(hint);
     renderRomajiKanaInputField(container, state, question, answered);
   } else {

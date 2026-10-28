@@ -629,7 +629,7 @@ const hammy = (function () {
       return;
     }
 
-    shell.setAttribute('title', 'Play with Hammy');
+    // shell.setAttribute('title', 'Play with Hammy');
     shell.addEventListener('click', () => {
       if (!isMainMenuView() || centerStageActive) {
         return;

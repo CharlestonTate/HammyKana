@@ -1,0 +1,3 @@
+in the future for instant feedback, do use
+Model	Download Size (Quantized)	VRAM / RAM Required	Best Used For
+Qwen2.5-0.5B-Instruct	~350 MB	~1 GB	Ultra-fast responses, basic text classification, structured JSON generation, simple text extraction.
