@@ -18,7 +18,8 @@ const state = {
     script: 'all',
     questionType: 'all'
   },
-  bombRushError: ''
+  bombRushError: '',
+  groupIntro: null
 };
 
 function initApp() {

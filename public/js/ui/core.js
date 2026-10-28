@@ -40,6 +40,8 @@ function render(state) {
     renderSettingsPage(state);
   } else if (state.activeView === 'about') {
     renderAboutPage(state);
+  } else if (state.activeView === 'groupIntro') {
+    renderGroupIntroPage(state);
   } else {
     renderPath(state);
   }

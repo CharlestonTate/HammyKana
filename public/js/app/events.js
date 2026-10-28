@@ -45,6 +45,12 @@ function bindEvents() {
         return;
       }
 
+      if (state.activeView === 'groupIntro') {
+        stopSpeech();
+        closeGroupIntro();
+        return;
+      }
+
       if (state.activeView === 'about') {
         state.activeView = 'path';
         render(state);

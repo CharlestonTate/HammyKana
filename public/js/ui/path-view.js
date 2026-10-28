@@ -172,7 +172,11 @@ function createLessonNode(state, groupIndex, lessonIndex, groupProgress, current
   if (canStart) {
     node.addEventListener('click', () => {
       playSfx('click');
-      startLesson(groupIndex, lessonIndex);
+      if (isGroupIntroLesson(lessonIndex)) {
+        openGroupIntro(groupIndex, lessonIndex);
+      } else {
+        startLesson(groupIndex, lessonIndex);
+      }
     });
   }
 
