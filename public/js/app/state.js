@@ -49,8 +49,11 @@ function initApp() {
     kanaDictionary.init();
   }
   bindEvents();
-  render(state);
-  playCourseEnterSfx();
+
+  loadPronunciationHints().then(() => {
+    render(state);
+    playCourseEnterSfx();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

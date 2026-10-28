@@ -76,16 +76,15 @@ function renderGroupIntroPage(state) {
   const subtitle = document.createElement('p');
   subtitle.className = 'group-intro-subtitle';
   subtitle.textContent = isWordSet
-    ? `Group ${pending.groupIndex + 1}: ${groupTitle} — tap a card to hear it, then start the lesson.`
-    : `Group ${pending.groupIndex + 1}: ${groupTitle} — learn the sound of each letter before the quiz.`;
+    ? `Group ${pending.groupIndex + 1}: ${groupTitle} — review how each letter sounds in English, then start.`
+    : `Group ${pending.groupIndex + 1}: ${groupTitle} — how each letter sounds to an English speaker.`;
   page.appendChild(subtitle);
 
   const grid = document.createElement('div');
   grid.className = 'group-intro-grid';
 
   entries.forEach((entry) => {
-    const card = document.createElement('button');
-    card.type = 'button';
+    const card = document.createElement('div');
     card.className = 'group-intro-card';
 
     const glyph = document.createElement('span');
@@ -99,14 +98,9 @@ function renderGroupIntroPage(state) {
     card.appendChild(roman);
 
     const hint = document.createElement('span');
-    hint.className = 'group-intro-speak-hint';
-    hint.textContent = 'Tap to hear';
+    hint.className = 'group-intro-hint';
+    hint.textContent = getPronunciationHint(trackId, entry.kana, entry.romaji);
     card.appendChild(hint);
-
-    card.addEventListener('click', () => {
-      playSfx('click');
-      speakCharacterEntry(entry, trackId);
-    });
 
     grid.appendChild(card);
   });
@@ -119,7 +113,6 @@ function renderGroupIntroPage(state) {
   startButton.textContent = isWordSet ? 'Start word lessons' : 'Start lesson';
   startButton.addEventListener('click', () => {
     playSfx('click');
-    stopSpeech();
     beginLessonFromIntro();
   });
   page.appendChild(startButton);

@@ -46,7 +46,6 @@ function bindEvents() {
       }
 
       if (state.activeView === 'groupIntro') {
-        stopSpeech();
         closeGroupIntro();
         return;
       }
