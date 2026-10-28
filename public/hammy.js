@@ -1,7 +1,7 @@
 const hammy = (function () {
-  const idleImages = ['img/idle1.png', 'img/idle2.png'];
-  const talkImages = ['img/talk1.png', 'img/talk2.png'];
-  const smileImages = ['img/smile1.png', 'img/smile2.png'];
+  const idleImages = ['/img/idle1.png', '/img/idle2.png'];
+  const talkImages = ['/img/talk1.png', '/img/talk2.png'];
+  const smileImages = ['/img/smile1.png', '/img/smile2.png'];
 
   // Tweaks for Hammy animation, center stage, fling, and wander — edit freely.
   const HAMMY_TUNING = {

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>HammyKana</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/site/site.min.css" rel="stylesheet">
+  <link href="https://db.onlinewebfonts.com/c/fb1fb17e0be5850598ac0f40e356bf77?family=DIN+Next+Rounded+LT+W01+Medium" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <button type="button" class="header-button" id="gallery-button" aria-label="Open kana gallery">
+      Gallery
+    </button>
+    <nav class="tab-nav" aria-label="Script selection">
+      <button type="button" class="tab active" data-script="hiragana">Hiragana</button>
+      <button type="button" class="tab" data-script="katakana">Katakana</button>
+    </nav>
+    <div class="header-actions">
+      <button type="button" class="header-button" id="about-button" aria-label="Open about page">
+        About
+      </button>
+      <button type="button" class="header-button" id="settings-button" aria-label="Open settings">
+        Settings
+      </button>
+    </div>
+  </header>
+
+  <main id="app" class="app"></main>
+
+  <div class="hammy-shell">
+    <div class="hammy-bubble" id="hammy-message"></div>
+    <img id="hammy-image" src="/img/idle1.png" alt="Hammy the hamster">
+  </div>
+
+  <script>
+    window.HAMMY_BOOT = {
+      courseId: 'japanese',
+      tracks: ['hiragana', 'katakana'],
+      defaultTrack: 'hiragana'
+    };
+  </script>
+  <script src="/js/assets.js"></script>
+  <script src="/data/courses.js"></script>
+  <script src="/data/hiragana.js"></script>
+  <script src="/data/katakana.js"></script>
+  <script src="/data/telugu.js"></script>
+  <script src="/data/words.js"></script>
+  <script src="/data/telugu-words.js"></script>
+  <script src="/js/script-registry.js"></script>
+  <script src="/js/storage.js"></script>
+  <script src="/js/romaji-ime.js"></script>
+  <script src="/js/telugu-ime.js"></script>
+  <script src="/js/input-engine.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/lessons.js"></script>
+  <script src="/js/quiz.js"></script>
+  <script src="/js/ui/core.js"></script>
+  <script src="/js/ui/path-view.js"></script>
+  <script src="/js/ui/quiz-view.js"></script>
+  <script src="/js/ui/quiz-keyboard.js"></script>
+  <script src="/js/kana-dictionary.js"></script>
+  <script src="/js/ui/gallery-view.js"></script>
+  <script src="/js/ui/bomb-rush-view.js"></script>
+  <script src="/js/ui/settings-view.js"></script>
+  <script src="/js/ui/about-view.js"></script>
+  <script src="/js/controller.js"></script>
+  <script src="/hammy.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+  <script src="/js/app/boot.js"></script>
+  <script src="/js/app/state.js"></script>
+  <script src="/js/app/navigation.js"></script>
+  <script src="/js/app/quiz-flow.js"></script>
+  <script src="/js/app/progress-actions.js"></script>
+  <script src="/js/app/events.js"></script>
+</body>
+</html>

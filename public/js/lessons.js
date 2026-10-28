@@ -36,12 +36,12 @@ function pickDistractors(script, groupIndex, kanaEntry, count) {
 }
 
 function getGroupKana(script, groupIndex) {
-  const data = getScriptData(script);
+  const data = getTrackData(script);
   return data.kana.filter((entry) => entry.group === groupIndex);
 }
 
 function getAvailableKana(script, maxGroupIndex) {
-  const data = getScriptData(script);
+  const data = getTrackData(script);
   return data.kana.filter((entry) => entry.group <= maxGroupIndex);
 }
 
@@ -147,7 +147,7 @@ function buildWordQuestionFromWord(word, script) {
 }
 
 function getWordsForGroup(script, groupIndex) {
-  return WORDS[script].filter((word) => word.requiredGroup === groupIndex);
+  return getWords(script).filter((word) => word.requiredGroup === groupIndex);
 }
 
 function buildKanaToRomajiQuestion(kanaEntry, distractors, script) {
@@ -243,7 +243,7 @@ function filterTypableWords(words, script, maxGroupIndex) {
 function buildWordQuestions(script, groupIndex, lessonIndex) {
   const groupWords = filterTypableWords(getWordsForGroup(script, groupIndex), script, groupIndex);
   const priorWords = filterTypableWords(
-    WORDS[script].filter((word) => word.requiredGroup < groupIndex),
+    getWords(script).filter((word) => word.requiredGroup < groupIndex),
     script,
     groupIndex
   );
@@ -264,15 +264,21 @@ function buildQuestions(script, groupIndex, lessonIndex) {
 const BOMB_RUSH_MIN_QUESTIONS = 200;
 
 function getBombRushScripts(scriptFilter) {
-  if (scriptFilter === 'hiragana' || scriptFilter === 'katakana') {
+  const courseTracks = getTrackIds();
+
+  if (scriptFilter === 'all') {
+    return courseTracks;
+  }
+
+  if (courseTracks.includes(scriptFilter)) {
     return [scriptFilter];
   }
 
-  return ['hiragana', 'katakana'];
+  return courseTracks;
 }
 
 function buildBombRushPoolForScript(script, scriptProgress) {
-  const masteredKana = getMasteredKana(script, scriptProgress);
+  const masteredKana = getMasteredCharacters(script, scriptProgress);
   const maxMasteredGroup = masteredKana.reduce(
     (groupIndex, entry) => Math.max(groupIndex, entry.group),
     -1
@@ -284,7 +290,7 @@ function buildBombRushPoolForScript(script, scriptProgress) {
   });
 
   const availableWords = filterTypableWords(
-    WORDS[script].filter((word) => word.requiredGroup <= maxMasteredGroup),
+    getWords(script).filter((word) => word.requiredGroup <= maxMasteredGroup),
     script,
     maxMasteredGroup
   );
@@ -299,7 +305,7 @@ function buildBombRushQuestions(filters, progress) {
   let wordQuestions = [];
 
   scripts.forEach((script) => {
-    const pool = buildBombRushPoolForScript(script, progress[script]);
+    const pool = buildBombRushPoolForScript(script, getTrackProgress(progress, script));
     kanaQuestions = kanaQuestions.concat(pool.kanaQuestions);
     wordQuestions = wordQuestions.concat(pool.wordQuestions);
   });
@@ -326,6 +332,6 @@ function buildBombRushQuestions(filters, progress) {
 }
 
 function getAllKanaForGallery(script) {
-  const data = getScriptData(script);
+  const data = getTrackData(script);
   return data.kana;
 }

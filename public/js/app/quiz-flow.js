@@ -179,7 +179,7 @@ function handleQuizCompletion(appState) {
 }
 
 function finishLesson(appState) {
-  const scriptProgress = appState.progress[appState.activeScript];
+  const scriptProgress = getTrackProgress(appState.progress, appState.activeScript);
   const group = scriptProgress.groups[appState.quiz.groupIndex];
   const wasMastered = group.mastered;
 

@@ -1,9 +1,13 @@
-// HammyKana has no JS modules/bundling to do - it's plain global scripts loaded in
-// order by index.html. Everything they need (css/, data/, js/, hammy.js, img/, sfx/)
-// lives in public/, which Vite copies to dist/ as-is. This config just makes the
-// build output explicit; Vite's defaults already do the rest.
+// HammyKana: static global scripts in public/; Vite builds multi-page entries for / and /telugu/.
 export default {
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        japanese: 'japanese/index.html',
+        telugu: 'telugu/index.html'
+      }
+    }
   }
 };

@@ -131,6 +131,13 @@ input {
   background: var(--fill-tertiary);
 }
 
+a.header-course-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -1856,4 +1863,85 @@ body.hammy-center-stage-exiting .hammy-shell img {
   .kana-dictionary-grid {
     grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
   }
+}
+
+/* ----- Course hub (/) ----- */
+
+.course-hub-body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg-grouped);
+  font-family: 'DIN Next Rounded LT W01 Medium', system-ui, sans-serif;
+}
+
+.course-hub {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4) var(--space-2);
+}
+
+.course-hub-card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+
+.course-hub-mascot {
+  width: 120px;
+  height: auto;
+  margin-bottom: var(--space-2);
+}
+
+.course-hub-title {
+  margin: 0 0 var(--space-1);
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.course-hub-subtitle {
+  margin: 0 0 var(--space-4);
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.course-hub-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.course-hub-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-3) var(--space-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s var(--ease-standard), transform 0.15s var(--ease-standard);
+  cursor: pointer;
+}
+
+.course-hub-button:hover,
+.course-hub-button:focus-visible {
+  background: var(--fill-tertiary);
+  transform: translateY(-1px);
+}
+
+.course-hub-button-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.course-hub-button-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }

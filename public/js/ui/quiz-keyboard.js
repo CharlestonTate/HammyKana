@@ -21,11 +21,12 @@ function getRomajiTargetKana(question) {
 
 function applyRomajiBackspace(question) {
   const script = question.script;
-  const result = processRomajiBackspace({
+  const result = processLatinBackspace({
     buffer: question.romajiBuffer || '',
     guess: question.guess || '',
     romajiTyped: question.romajiTyped || '',
     script,
+    trackId: script,
     targetKana: getRomajiTargetKana(question)
   });
   question.romajiBuffer = result.buffer;
@@ -35,7 +36,7 @@ function applyRomajiBackspace(question) {
 }
 
 function canSubmitRomajiKana(question) {
-  return isRomajiInputComplete({
+  return isLatinInputComplete({
     buffer: question.romajiBuffer || '',
     guess: question.guess || ''
   });
@@ -50,11 +51,12 @@ function getRomajiInputDisplayValue(guess, romajiBuffer) {
 }
 
 function applyRomajiCandidateToQuestion(question, candidateKana, script) {
-  const result = applyRomajiCandidate({
+  const result = applyLatinCandidate({
     buffer: question.romajiBuffer || '',
     guess: question.guess || '',
     candidateKana,
     script,
+    trackId: script,
     romajiTyped: question.romajiTyped || '',
     targetKana: getRomajiTargetKana(question)
   });
@@ -70,7 +72,7 @@ function getRomajiCandidateList(question, script) {
     return [];
   }
 
-  return getRomajiCandidates(buffer, script, question.guess || '');
+  return getLatinCandidates(buffer, script, question.guess || '');
 }
 
 function syncRomajiCandidateIndex(question, candidates) {
@@ -287,10 +289,11 @@ function handleRomajiKanaTyping(event, state, question) {
     }
 
     if (question.romajiBuffer) {
-      const finalized = finalizeRomajiInput({
+      const finalized = finalizeLatinInput({
         buffer: question.romajiBuffer || '',
         guess: question.guess || '',
         script,
+        trackId: script,
         romajiTyped: question.romajiTyped || '',
         targetKana: getRomajiTargetKana(question)
       });
@@ -310,18 +313,19 @@ function handleRomajiKanaTyping(event, state, question) {
     return;
   }
 
-  const letter = event.key.toLowerCase();
-  if (!letter.match(/^[a-z]$/)) {
+  if (!isLatinTypingKey(event.key, script)) {
     return;
   }
 
   event.preventDefault();
 
-  const result = processRomajiInput({
+  const letter = normalizeLatinTypingKey(event.key, script);
+  const result = processLatinInput({
     buffer: question.romajiBuffer || '',
     guess: question.guess || '',
     key: letter,
     script,
+    trackId: script,
     romajiTyped: question.romajiTyped || '',
     targetKana: getRomajiTargetKana(question)
   });
@@ -508,10 +512,11 @@ function renderSpellingQuestion(container, state, question) {
 
     if (isKanaTyping) {
       if (question.romajiBuffer) {
-        const finalized = finalizeRomajiInput({
+        const finalized = finalizeLatinInput({
           buffer: question.romajiBuffer || '',
           guess: question.guess || '',
           script: question.script || state.activeScript,
+          trackId: question.script || state.activeScript,
           romajiTyped: question.romajiTyped || '',
           targetKana: getRomajiTargetKana(question)
         });

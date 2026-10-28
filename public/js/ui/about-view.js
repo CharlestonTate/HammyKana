@@ -47,18 +47,22 @@ function renderAboutPage(state) {
 
   const heroImage = document.createElement('img');
   heroImage.className = 'about-hero-image';
-  heroImage.src = 'img/idle1.png';
+  heroImage.src = assetUrl('img/idle1.png');
   heroImage.alt = 'Hammy the hamster';
   hero.appendChild(heroImage);
 
   const heading = document.createElement('h1');
   heading.className = 'about-heading';
-  heading.textContent = 'HammyKana';
+  const course = getCourseConfig();
+  heading.textContent = course.brandTitle;
   hero.appendChild(heading);
 
   const tagline = document.createElement('p');
   tagline.className = 'about-tagline';
-  tagline.textContent = 'Learn hiragana and katakana, one lesson at a time.';
+  tagline.textContent =
+    state.courseId === 'telugu'
+      ? 'Learn the Telugu alphabet, one lesson at a time (ISO 15919 typing).'
+      : 'Learn hiragana and katakana, one lesson at a time.';
   hero.appendChild(tagline);
 
   card.appendChild(hero);
@@ -76,6 +80,14 @@ function renderAboutPage(state) {
   });
 
   card.appendChild(creditsSection);
+
+  const crossLink = document.createElement('p');
+  crossLink.className = 'about-tagline';
+  const menuLink = document.createElement('a');
+  menuLink.href = '/';
+  menuLink.textContent = 'Main menu';
+  crossLink.appendChild(menuLink);
+  card.appendChild(crossLink);
 
   const quote = document.createElement('blockquote');
   quote.className = 'about-quote';

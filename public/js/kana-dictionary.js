@@ -198,7 +198,7 @@ const kanaDictionary = {
       }
     }
 
-    const currentLesson = getCurrentLesson(state.progress[script]);
+    const currentLesson = getCurrentLesson(getTrackProgress(state.progress, script), script);
     const maxUnlockedGroup = currentLesson.groupIndex;
     const availableGroup =
       questionGroup != null ? Math.min(questionGroup, maxUnlockedGroup) : maxUnlockedGroup;

@@ -1,9 +1,9 @@
 // The lesson path: 26 kana groups x 10 lesson nodes each, with unlock/mastery states.
 
 function renderPath(state) {
-  const scriptProgress = state.progress[state.activeScript];
-  const groupData = getScriptData(state.activeScript);
-  const current = getCurrentLesson(scriptProgress);
+  const scriptProgress = getTrackProgress(state.progress, state.activeScript);
+  const groupData = getTrackData(state.activeScript);
+  const current = getCurrentLesson(scriptProgress, state.activeScript);
   const path = document.createElement('section');
   path.className = 'lesson-path';
 
@@ -84,7 +84,10 @@ function renderPath(state) {
     if (masteryTarget) {
       masteryTarget.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      const nextLesson = getCurrentLesson(state.progress[state.activeScript]);
+      const nextLesson = getCurrentLesson(
+        getTrackProgress(state.progress, state.activeScript),
+        state.activeScript
+      );
       const lessonId = `lesson-${nextLesson.groupIndex}-${nextLesson.lessonIndex}`;
       const targetNode = document.getElementById(lessonId);
 
@@ -139,7 +142,11 @@ function createLessonNode(state, groupIndex, lessonIndex, groupProgress, current
 
   const isComplete = groupProgress.lessons[lessonIndex];
   const isCurrent = current.groupIndex === groupIndex && current.lessonIndex === lessonIndex;
-  const canStart = canStartLesson(state.progress[state.activeScript], groupIndex, lessonIndex);
+  const canStart = canStartLesson(
+    getTrackProgress(state.progress, state.activeScript),
+    groupIndex,
+    lessonIndex
+  );
 
   if (groupProgress.mastered) {
     node.classList.add('mastered');

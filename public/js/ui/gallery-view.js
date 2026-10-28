@@ -2,12 +2,13 @@
 
 function renderGalleryPage(state) {
   const script = state.activeScript;
-  const scriptProgress = state.progress[script];
+  const scriptProgress = getTrackProgress(state.progress, script);
   const allKana = getAllKanaForGallery(script);
   const masteredSet = new Set(
-    getMasteredKana(script, scriptProgress).map((entry) => entry.kana)
+    getMasteredCharacters(script, scriptProgress).map((entry) => entry.kana)
   );
-  const scriptLabel = script === 'hiragana' ? 'Hiragana' : 'Katakana';
+  const trackMeta = getCourseConfig().tracks.find((track) => track.id === script);
+  const scriptLabel = trackMeta ? trackMeta.label : script;
   const page = document.createElement('section');
   page.className = 'gallery-page';
 

@@ -1,13 +1,13 @@
 // The single mutable app state, and startup wiring.
 
+const bootConfig = getBootConfig();
+
 const state = {
-  activeScript: 'hiragana',
+  courseId: bootConfig.courseId,
+  activeScript: bootConfig.defaultTrack || getCourseConfig().defaultTrack,
   activeView: 'path',
   settings: createDefaultSettings(),
-  progress: {
-    hiragana: createDefaultScriptProgress(),
-    katakana: createDefaultScriptProgress()
-  },
+  progress: createDefaultProgress(),
   quiz: null,
   showQuitConfirm: false,
   lessonCompleteCelebrated: false,
@@ -22,14 +22,13 @@ const state = {
 };
 
 function initApp() {
+  applyBootConfig();
   cacheDomElements();
 
   const saved = loadProgress();
   state.settings = saved.settings;
-  state.progress = {
-    hiragana: saved.hiragana,
-    katakana: saved.katakana
-  };
+  state.progress = { tracks: saved.tracks };
+  state.activeScript = bootConfig.defaultTrack || getCourseConfig().defaultTrack;
   window.currentProgress = state;
 
   window.resetHammyKanaProgress = resetHammyKanaProgress;
@@ -37,6 +36,9 @@ function initApp() {
   window.viewCurrentProgress = viewCurrentProgress;
   window.set_hiragana = set_hiragana;
   window.set_katakana = set_katakana;
+  window.set_telugu = set_telugu;
+
+  updateActiveTab(state.activeScript);
 
   preloadSounds();
   if (typeof hammy !== 'undefined' && typeof hammy.init === 'function') {
@@ -47,6 +49,7 @@ function initApp() {
   }
   bindEvents();
   render(state);
+  playCourseEnterSfx();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

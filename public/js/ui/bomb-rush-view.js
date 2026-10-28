@@ -6,11 +6,18 @@ const BOMB_RUSH_TIME_OPTIONS = [
   { value: 'infinite', label: 'Infinite' }
 ];
 
-const BOMB_RUSH_SCRIPT_OPTIONS = [
-  { value: 'all', label: 'All Scripts' },
-  { value: 'hiragana', label: 'Hiragana Only' },
-  { value: 'katakana', label: 'Katakana Only' }
-];
+function getBombRushScriptOptions() {
+  const allowed = new Set(getTrackIds());
+  const options = [{ value: 'all', label: 'All Scripts' }];
+
+  getCourseConfig().tracks.forEach((track) => {
+    if (allowed.has(track.id)) {
+      options.push({ value: track.id, label: `${track.label} Only` });
+    }
+  });
+
+  return options;
+}
 
 const BOMB_RUSH_QUESTION_TYPE_OPTIONS = [
   { value: 'all', label: 'All Questions' },
@@ -81,7 +88,7 @@ function renderBombRushSetup(state) {
     render(state);
   }));
 
-  body.appendChild(createBombRushOptionGroup('Script', BOMB_RUSH_SCRIPT_OPTIONS, setup.script, (value) => {
+  body.appendChild(createBombRushOptionGroup('Script', getBombRushScriptOptions(), setup.script, (value) => {
     setup.script = value;
     state.bombRushError = '';
     render(state);

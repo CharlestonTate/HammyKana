@@ -3,62 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>HammyKana</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
-  <link rel="stylesheet" href="css/styles.css">
-  <link href="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/site/site.min.css" rel="stylesheet">
+  <title>Hammy — Choose a course</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="stylesheet" href="/css/styles.css">
   <link href="https://db.onlinewebfonts.com/c/fb1fb17e0be5850598ac0f40e356bf77?family=DIN+Next+Rounded+LT+W01+Medium" rel="stylesheet">
 </head>
-<body>
-  <header class="header">
-    <button type="button" class="header-button" id="gallery-button" aria-label="Open kana gallery">
-      Gallery
-    </button>
-    <nav class="tab-nav" aria-label="Script selection">
-      <button type="button" class="tab active" data-script="hiragana">Hiragana</button>
-      <button type="button" class="tab" data-script="katakana">Katakana</button>
-    </nav>
-    <div class="header-actions">
-      <button type="button" class="header-button" id="about-button" aria-label="Open about page">
-        About
-      </button>
-      <button type="button" class="header-button" id="settings-button" aria-label="Open settings">
-        Settings
-      </button>
+<body class="course-hub-body">
+  <main class="course-hub">
+    <div class="course-hub-card">
+      <img class="course-hub-mascot" src="/img/idle1.png" width="120" height="120" alt="Hammy the hamster">
+      <h1 class="course-hub-title">HammyKana</h1>
+      <p class="course-hub-subtitle">Pick a course to start learning.</p>
+      <nav class="course-hub-actions" aria-label="Course selection">
+        <a class="course-hub-button" href="/japanese/" data-course-entry="japanese">
+          <span class="course-hub-button-label">Japanese</span>
+          <span class="course-hub-button-hint">Hiragana &amp; katakana</span>
+        </a>
+        <a class="course-hub-button" href="/telugu/" data-course-entry="telugu">
+          <span class="course-hub-button-label">Telugu</span>
+          <span class="course-hub-button-hint">Telugu alphabet</span>
+        </a>
+      </nav>
     </div>
-  </header>
-
-  <main id="app" class="app"></main>
-
-  <div class="hammy-shell">
-    <div class="hammy-bubble" id="hammy-message"></div>
-    <img id="hammy-image" src="img/idle1.png" alt="Hammy the hamster">
-  </div>
-
-  <script src="data/hiragana.js"></script>
-  <script src="data/katakana.js"></script>
-  <script src="data/words.js"></script>
-  <script src="js/romaji-ime.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/lessons.js"></script>
-  <script src="js/quiz.js"></script>
-  <script src="js/ui/core.js"></script>
-  <script src="js/ui/path-view.js"></script>
-  <script src="js/ui/quiz-view.js"></script>
-  <script src="js/ui/quiz-keyboard.js"></script>
-  <script src="js/kana-dictionary.js"></script>
-  <script src="js/ui/gallery-view.js"></script>
-  <script src="js/ui/bomb-rush-view.js"></script>
-  <script src="js/ui/settings-view.js"></script>
-  <script src="js/ui/about-view.js"></script>
-  <script src="js/controller.js"></script>
-  <script src="hammy.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
-  <script src="js/app/state.js"></script>
-  <script src="js/app/navigation.js"></script>
-  <script src="js/app/quiz-flow.js"></script>
-  <script src="js/app/progress-actions.js"></script>
-  <script src="js/app/events.js"></script>
+  </main>
+  <script src="/js/assets.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/hub.js"></script>
 </body>
 </html>

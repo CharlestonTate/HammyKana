@@ -4,13 +4,13 @@
 function persistProgress() {
   saveProgress({
     settings: state.settings,
-    hiragana: state.progress.hiragana,
-    katakana: state.progress.katakana
+    tracks: state.progress.tracks
   });
 }
 
 function resetHammyKanaProgress() {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(STORAGE_KEY_V1);
   console.log('HammyKana progress wiped. Reloading.');
   window.location.reload();
 }
@@ -27,9 +27,10 @@ function viewCurrentProgress() {
 function setScriptProgress(script, group, lesson) {
   const groupIndex = group - 1;
   const lessonIndex = lesson - 1;
+  const groupCount = getGroupCount(script);
 
-  if (groupIndex < 0 || groupIndex >= GROUP_COUNT) {
-    console.warn(`group must be between 1 and ${GROUP_COUNT}.`);
+  if (groupIndex < 0 || groupIndex >= groupCount) {
+    console.warn(`group must be between 1 and ${groupCount}.`);
     return;
   }
 
@@ -38,7 +39,7 @@ function setScriptProgress(script, group, lesson) {
     return;
   }
 
-  const scriptProgress = createDefaultScriptProgress();
+  const scriptProgress = createDefaultTrackProgress(script);
 
   for (let priorGroup = 0; priorGroup < groupIndex; priorGroup++) {
     for (let l = 0; l < LESSONS_PER_GROUP; l++) {
@@ -50,7 +51,7 @@ function setScriptProgress(script, group, lesson) {
     markLessonComplete(scriptProgress, groupIndex, l);
   }
 
-  state.progress[script] = scriptProgress;
+  state.progress.tracks[script] = scriptProgress;
   state.activeScript = script;
   state.activeView = 'path';
   state.quiz = null;
@@ -71,6 +72,10 @@ function set_katakana(group, lesson) {
   setScriptProgress('katakana', group, lesson);
 }
 
+function set_telugu(group, lesson) {
+  setScriptProgress('telugu', group, lesson);
+}
+
 function downloadProgressBackup() {
   downloadProgressFile(state.settings, state.progress);
 }
@@ -78,8 +83,7 @@ function downloadProgressBackup() {
 function applyImportedProgress(imported) {
   state.settings = imported.settings;
   state.progress = {
-    hiragana: imported.hiragana,
-    katakana: imported.katakana
+    tracks: imported.tracks
   };
   window.currentProgress = state;
   setMusicVolume(state.settings.musicVolume);
@@ -119,4 +123,3 @@ function onShowRomajiChange(event) {
     render(state);
   }
 }
-

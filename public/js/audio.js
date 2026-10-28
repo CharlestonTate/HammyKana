@@ -5,7 +5,8 @@ const SOUND_MAP = {
   wrong: 'quit.wav',
   complete: 'money.wav',
   click: 'select.wav',
-  finish: 'finish.wav'
+  finish: 'finish.wav',
+  enter: 'nexton.wav'
 };
 const soundBuffers = {};
 let audioContext = null;
@@ -46,7 +47,7 @@ function unlockAudioContext() {
 function loadSound(name, file) {
   const context = getAudioContext();
 
-  fetch(`sfx/${file}`)
+  fetch(assetUrl(`sfx/${file}`))
     .then((response) => response.arrayBuffer())
     .then((data) => context.decodeAudioData(data))
     .then((buffer) => {
@@ -91,7 +92,7 @@ function playSfxWithHtmlAudio(name, volume) {
     return;
   }
 
-  const audio = new Audio(`sfx/${file}`);
+  const audio = new Audio(assetUrl(`sfx/${file}`));
   audio.volume = volume;
   audio.play().catch((error) => {
     console.warn(`Could not play sfx/${file}:`, error);
@@ -146,6 +147,35 @@ function setMusicVolume(volume) {
   if (musicElement) {
     musicElement.volume = volume;
   }
+}
+
+function playEnterSfx(onComplete) {
+  const volume = getSfxVolume();
+  if (volume <= 0) {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
+
+  unlockAudioContext();
+  const file = SOUND_MAP.enter;
+  const audio = new Audio(assetUrl(`sfx/${file}`));
+  audio.volume = volume;
+
+  const done = () => {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+  };
+
+  audio.addEventListener('ended', done, { once: true });
+  audio.addEventListener('error', done, { once: true });
+  audio.play().catch(done);
+}
+
+function playCourseEnterSfx() {
+  playEnterSfx();
 }
 
 function startMusic(src) {
