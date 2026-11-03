@@ -25,6 +25,36 @@ function createAboutRow(credit) {
   return row;
 }
 
+function createStrokeCreditRow() {
+  const row = document.createElement('div');
+  row.className = 'about-row';
+
+  const label = document.createElement('span');
+  label.className = 'about-row-label';
+  label.textContent = 'Stroke order';
+
+  const value = document.createElement('span');
+  value.className = 'about-row-value';
+
+  const gifLink = document.createElement('a');
+  gifLink.href = 'https://github.com/jcsirot/kanji.gif';
+  gifLink.textContent = 'kanji.gif';
+
+  const kanjiVgLink = document.createElement('a');
+  kanjiVgLink.href = 'http://kanjivg.tagaini.net';
+  kanjiVgLink.textContent = 'KanjiVG';
+
+  value.appendChild(document.createTextNode('Animations from '));
+  value.appendChild(gifLink);
+  value.appendChild(document.createTextNode(', based on '));
+  value.appendChild(kanjiVgLink);
+  value.appendChild(document.createTextNode('. CC BY-SA 3.0.'));
+
+  row.appendChild(label);
+  row.appendChild(value);
+  return row;
+}
+
 function renderAboutPage(state) {
   const aboutPage = document.createElement('section');
   aboutPage.className = 'about-page';
@@ -78,6 +108,10 @@ function renderAboutPage(state) {
   ABOUT_CREDITS.forEach((credit) => {
     creditsSection.appendChild(createAboutRow(credit));
   });
+
+  if (state.courseId === 'japanese') {
+    creditsSection.appendChild(createStrokeCreditRow());
+  }
 
   card.appendChild(creditsSection);
 

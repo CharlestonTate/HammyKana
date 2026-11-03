@@ -8,7 +8,7 @@ function switchScript(script) {
   playSfx('click');
   state.activeScript = script;
 
-  if (state.activeView !== 'gallery') {
+  if (state.activeView !== 'gallery' && state.activeView !== 'draw') {
     state.activeView = 'path';
   }
 
@@ -58,6 +58,32 @@ function openGallery() {
 
 function closeGallery() {
   state.activeView = 'path';
+  render(state);
+}
+
+function openDraw() {
+  playSfx('click');
+  state.drawGroupIndex = null;
+  state.activeView = 'draw';
+  render(state);
+}
+
+function closeDraw() {
+  state.drawGroupIndex = null;
+  state.activeView = 'path';
+  render(state);
+}
+
+function openDrawSet(groupIndex) {
+  playSfx('click');
+  state.drawGroupIndex = groupIndex;
+  state.activeView = 'draw';
+  render(state);
+}
+
+function closeDrawSet() {
+  playSfx('click');
+  state.drawGroupIndex = null;
   render(state);
 }
 

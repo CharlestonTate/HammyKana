@@ -11,9 +11,14 @@
 </head>
 <body>
   <header class="header">
-    <button type="button" class="header-button" id="gallery-button" aria-label="Open kana gallery">
-      Gallery
-    </button>
+    <div class="header-start">
+      <button type="button" class="header-button" id="draw-button" aria-label="Practice drawing kana">
+        Draw
+      </button>
+      <button type="button" class="header-button" id="gallery-button" aria-label="Open kana gallery">
+        Gallery
+      </button>
+    </div>
     <nav class="tab-nav" aria-label="Script selection">
       <button type="button" class="tab active" data-script="hiragana">Hiragana</button>
       <button type="button" class="tab" data-script="katakana">Katakana</button>
@@ -64,6 +69,7 @@
   <script src="/js/ui/quiz-keyboard.js"></script>
   <script src="/js/kana-dictionary.js"></script>
   <script src="/js/ui/gallery-view.js"></script>
+  <script src="/js/ui/draw-view.js"></script>
   <script src="/js/ui/bomb-rush-view.js"></script>
   <script src="/js/ui/settings-view.js"></script>
   <script src="/js/ui/about-view.js"></script>

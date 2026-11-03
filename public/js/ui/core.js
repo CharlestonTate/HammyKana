@@ -19,6 +19,7 @@ function clearApp() {
 function updateHeaderVisibility(activeView) {
   ui.header.hidden = activeView === 'quiz';
   document.body.classList.toggle('is-quiz', activeView === 'quiz');
+  document.body.classList.toggle('is-draw', activeView === 'draw');
 }
 
 // Full re-render: wipes #app and rebuilds whichever view is active. No diffing.
@@ -34,6 +35,8 @@ function render(state) {
     }
   } else if (state.activeView === 'gallery') {
     renderGalleryPage(state);
+  } else if (state.activeView === 'draw') {
+    renderDrawPage(state);
   } else if (state.activeView === 'bombRushSetup') {
     renderBombRushSetup(state);
   } else if (state.activeView === 'settings') {

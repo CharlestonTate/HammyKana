@@ -19,7 +19,8 @@ const state = {
     questionType: 'all'
   },
   bombRushError: '',
-  groupIntro: null
+  groupIntro: null,
+  drawGroupIndex: null
 };
 
 function initApp() {

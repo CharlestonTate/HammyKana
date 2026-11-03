@@ -65,7 +65,9 @@
 .hammy-play-pen-close:hover,
 .hammy-play-pen-close:focus-visible,
 .hammy-center-stage-back:hover,
-.hammy-center-stage-back:focus-visible {
+.hammy-center-stage-back:focus-visible,
+.draw-set:hover,
+.draw-set:focus-visible {
   outline: 2px solid var(--border);
   outline-offset: 2px;
 }
@@ -141,6 +143,13 @@ a.header-course-link {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+}
+
+.header-start {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .header-actions {
@@ -267,6 +276,10 @@ a.header-course-link {
 .about-row-value {
   text-align: right;
   color: var(--muted-text);
+}
+
+.about-row-value a {
+  color: inherit;
 }
 
 .about-quote {
@@ -846,16 +859,16 @@ a.header-course-link {
     gap: 6px 8px;
   }
 
-  #gallery-button {
-    flex: 0 0 auto;
+  .header-start {
     order: 1;
+    flex: 0 0 auto;
   }
 
   .header-actions {
     flex: 1 1 auto;
     order: 2;
     justify-content: flex-end;
-    max-width: calc(100% - 88px);
+    max-width: calc(100% - 9.5rem);
   }
 
   .header-actions .header-button,
@@ -1053,6 +1066,10 @@ a.header-course-link {
   .about-row-value {
     text-align: left;
   }
+}
+
+body.is-draw .hammy-shell {
+  display: none;
 }
 
 .hammy-shell {
@@ -2041,4 +2058,163 @@ body.hammy-center-stage-exiting .hammy-shell img {
   max-width: 320px;
   margin: 0 auto;
   display: block;
+}
+
+.draw-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.draw-note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.draw-sets {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.draw-set {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 76px;
+  background: var(--surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-1);
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.draw-set-kana {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.draw-set-romaji {
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.draw-set:hover {
+  background: var(--fill-tertiary);
+}
+
+.draw-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.draw-card-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.draw-card-kana {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.draw-card-romaji {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.draw-practice {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.draw-caption {
+  margin: 0 0 var(--space-1);
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.draw-guide-images {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.draw-stroke {
+  width: 148px;
+  height: 148px;
+  object-fit: contain;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.draw-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.draw-canvas {
+  width: 148px;
+  height: 148px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.draw-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.draw-grade {
+  margin: 0;
+  min-height: 1.25rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.draw-grade.is-good {
+  color: var(--success);
+}
+
+@media (max-width: 640px) {
+  .draw-sets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-1);
+  }
+
+  .draw-practice {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
 }

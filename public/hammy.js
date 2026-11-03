@@ -629,6 +629,7 @@ const hammy = (function () {
       return;
     }
 
+    // why is this here?
     // shell.setAttribute('title', 'Play with Hammy');
     shell.addEventListener('click', () => {
       if (!isMainMenuView() || centerStageActive) {

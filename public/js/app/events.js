@@ -2,6 +2,11 @@
 
 function bindEvents() {
   document.getElementById('gallery-button').addEventListener('click', openGallery);
+
+  const drawButton = document.getElementById('draw-button');
+  if (drawButton) {
+    drawButton.addEventListener('click', openDraw);
+  }
   document.getElementById('about-button').addEventListener('click', openAbout);
   document.getElementById('settings-button').addEventListener('click', openSettings);
 
@@ -37,6 +42,17 @@ function bindEvents() {
 
       if (state.activeView === 'gallery') {
         closeGallery();
+        return;
+      }
+
+      if (state.activeView === 'draw') {
+        if (state.drawGroupIndex != null) {
+          state.drawGroupIndex = null;
+          render(state);
+          return;
+        }
+
+        closeDraw();
         return;
       }
 
