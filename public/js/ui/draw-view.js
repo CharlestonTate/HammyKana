@@ -116,8 +116,12 @@ function createDrawCard(entry, showRomaji) {
 
   card.appendChild(label);
 
+  const characterCount = [...entry.kana].length;
   const practice = document.createElement('div');
   practice.className = 'draw-practice';
+  if (characterCount > 1) {
+    practice.classList.add('is-wide');
+  }
 
   const guide = document.createElement('div');
   const guideCaption = document.createElement('p');
@@ -147,8 +151,11 @@ function createDrawCard(entry, showRomaji) {
 
   const canvas = document.createElement('canvas');
   canvas.className = 'draw-canvas';
+  if (characterCount > 1) {
+    canvas.classList.add('is-wide');
+  }
   canvas.setAttribute('aria-label', `Drawing pad for ${entry.kana}`);
-  bindDrawPad(canvas);
+  bindDrawPad(canvas, characterCount);
   pad.appendChild(canvas);
 
   const actions = document.createElement('div');
@@ -188,11 +195,12 @@ function createDrawCard(entry, showRomaji) {
   return card;
 }
 
-function bindDrawPad(canvas) {
+function bindDrawPad(canvas, characterCount) {
   const context = canvas.getContext('2d');
-  const resolution = 440;
-  canvas.width = resolution;
-  canvas.height = resolution;
+  const height = 440;
+  const width = height * Math.max(1, characterCount);
+  canvas.width = width;
+  canvas.height = height;
   context.lineWidth = 14;
   context.lineCap = 'round';
   context.lineJoin = 'round';
@@ -205,8 +213,8 @@ function bindDrawPad(canvas) {
   function pointFromEvent(event) {
     const rect = canvas.getBoundingClientRect();
     return {
-      x: ((event.clientX - rect.left) / rect.width) * resolution,
-      y: ((event.clientY - rect.top) / rect.height) * resolution
+      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+      y: ((event.clientY - rect.top) / rect.height) * canvas.height
     };
   }
 
@@ -256,10 +264,10 @@ function clearDrawPad(canvas) {
 // Grades against the finished character, not the animation frame on screen.
 // The drawing is lined up by its own size, without stretching it.
 // Coverage is how much of the character your lines pass near.
-// A close shape snaps to 100. A filled scribble still has too much extra ink.
+// 100 requires the lines to land on the character, with little stray ink.
 const DRAW_GRADE_CELL = 96;
-const DRAW_COVER_RADIUS = 9;
-const DRAW_SPILL_RADIUS = 10;
+const DRAW_COVER_RADIUS = 8;
+const DRAW_SPILL_RADIUS = 9;
 
 const strokeReferenceCache = new Map();
 
@@ -476,12 +484,12 @@ function scoreShape(user, target, width, height) {
   const spill = spilled / userCount;
   const fullness = userCount / targetCount;
 
-  if (coverage >= 0.9 && spill <= 0.18 && fullness <= 2.3) {
+  if (coverage >= 0.96 && spill <= 0.1 && fullness <= 1.8) {
     return 100;
   }
 
-  const extraPenalty = Math.min(1, Math.max(0, fullness - 2.4) / 3);
-  return 100 * coverage * (1 - 0.25 * spill) * (1 - extraPenalty);
+  const extraPenalty = Math.min(1, Math.max(0, fullness - 2.1) / 3);
+  return 100 * coverage * (1 - 0.32 * spill) * (1 - extraPenalty);
 }
 
 function hasInkNearby(mask, width, height, x, y, radius) {

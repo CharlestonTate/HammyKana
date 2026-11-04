@@ -120,6 +120,10 @@ const hammy = (function () {
   let centerStageTalkIndex = 0;
   let centerStageEntranceTimer = null;
   let centerStageExitTimer = null;
+  let dialogueElements = null;
+  let dialogueTimer = null;
+  let dialogueSkip = null;
+  let dialogueBusy = false;
 
   function isMainMenuView() {
     return typeof state !== 'undefined' && state.activeView === 'path';
@@ -450,8 +454,8 @@ const hammy = (function () {
 
       centerStageMovement.isShooting = false;
       applyCenterStageTransform();
-      startCenterStageRoaming();
-      bindCenterStagePointer();
+      stopCenterStageSmileAnimation();
+      startIdleAnimation();
     }, HAMMY_TUNING.flyPopDurationMs);
   }
 
@@ -569,6 +573,7 @@ const hammy = (function () {
     }
 
     unbindCenterStagePointer();
+    closeHammyDialogue();
     stopCenterStageSmileAnimation();
     stopCenterStageTalkAnimation();
 
@@ -623,6 +628,196 @@ const hammy = (function () {
     return true;
   }
 
+  function parkHammyAboveDialogue() {
+    if (!centerStageMovement) {
+      return;
+    }
+
+    const parked = clampCenterStagePosition(
+      window.innerWidth / 2,
+      window.innerHeight * 0.34
+    );
+    centerStageMovement.position.x = parked.x;
+    centerStageMovement.position.y = parked.y;
+    applyCenterStageTransform();
+  }
+
+  function skipDialogueLine() {
+    if (dialogueSkip) {
+      dialogueSkip();
+    }
+  }
+
+  function typeDialogueLine(text) {
+    return new Promise((resolve) => {
+      if (!dialogueElements) {
+        resolve();
+        return;
+      }
+
+      const spoken = String(text || '');
+      let index = 0;
+      let settled = false;
+      dialogueElements.next.hidden = true;
+      dialogueElements.text.textContent = '';
+      startCenterStageTalkAnimation();
+
+      const finish = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (dialogueTimer) {
+          clearInterval(dialogueTimer);
+          dialogueTimer = null;
+        }
+        dialogueSkip = null;
+        if (dialogueElements) {
+          dialogueElements.text.textContent = spoken;
+          dialogueElements.next.hidden = false;
+        }
+        stopCenterStageTalkAnimation();
+        startIdleAnimation();
+        resolve();
+      };
+
+      dialogueSkip = finish;
+      dialogueTimer = setInterval(() => {
+        index += 1;
+        if (!dialogueElements) {
+          finish();
+          return;
+        }
+        dialogueElements.text.textContent = spoken.slice(0, index);
+        if (index >= spoken.length) {
+          finish();
+        }
+      }, 28);
+    });
+  }
+
+  function buildHammyDialogue() {
+    const box = document.createElement('div');
+    box.className = 'ac-dialogue';
+
+    const name = document.createElement('p');
+    name.className = 'ac-dialogue-name';
+    name.textContent = 'Hammy';
+
+    const text = document.createElement('p');
+    text.className = 'ac-dialogue-text';
+    text.addEventListener('click', (event) => {
+      event.stopPropagation();
+      skipDialogueLine();
+    });
+
+    const next = document.createElement('span');
+    next.className = 'ac-dialogue-next';
+    next.hidden = true;
+    next.setAttribute('aria-hidden', 'true');
+
+    const form = document.createElement('form');
+    form.className = 'ac-dialogue-form';
+    form.hidden = true;
+
+    const input = document.createElement('input');
+    input.className = 'ac-dialogue-input';
+    input.type = 'text';
+    input.maxLength = 500;
+    input.placeholder = 'Say something…';
+    input.setAttribute('aria-label', 'Say something to Hammy');
+
+    form.appendChild(input);
+    box.appendChild(name);
+    box.appendChild(text);
+    box.appendChild(next);
+    box.appendChild(form);
+    document.body.appendChild(box);
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      submitHammyDialogue();
+    });
+
+    return { box, text, next, form, input };
+  }
+
+  async function openHammyDialogue() {
+    if (!centerStageActive || dialogueBusy) {
+      if (dialogueBusy) {
+        skipDialogueLine();
+      }
+      return;
+    }
+
+    if (!dialogueElements) {
+      dialogueElements = buildHammyDialogue();
+      parkHammyAboveDialogue();
+      dialogueBusy = true;
+      await typeDialogueLine('Hey! What do you want to know?');
+      dialogueBusy = false;
+      if (!dialogueElements) {
+        return;
+      }
+      dialogueElements.form.hidden = false;
+      dialogueElements.next.hidden = true;
+      dialogueElements.input.focus();
+      return;
+    }
+
+    dialogueElements.input.focus();
+  }
+
+  async function submitHammyDialogue() {
+    if (!dialogueElements || dialogueBusy) {
+      return;
+    }
+
+    const text = dialogueElements.input.value.trim();
+    if (!text) {
+      return;
+    }
+
+    dialogueElements.input.value = '';
+    dialogueElements.form.hidden = true;
+    dialogueElements.next.hidden = true;
+    dialogueBusy = true;
+    startCenterStageTalkAnimation();
+
+    let reply = "I can't talk right now.";
+    if (window.hammyChat && typeof window.hammyChat.ask === 'function') {
+      reply = await window.hammyChat.ask(text);
+    }
+
+    if (!dialogueElements) {
+      dialogueBusy = false;
+      return;
+    }
+
+    stopCenterStageTalkAnimation();
+    await typeDialogueLine(reply);
+    dialogueBusy = false;
+    if (!dialogueElements) {
+      return;
+    }
+    dialogueElements.form.hidden = false;
+    dialogueElements.next.hidden = true;
+    dialogueElements.input.focus();
+  }
+
+  function closeHammyDialogue() {
+    if (dialogueTimer) {
+      clearInterval(dialogueTimer);
+      dialogueTimer = null;
+    }
+    dialogueSkip = null;
+    dialogueBusy = false;
+    if (dialogueElements) {
+      dialogueElements.box.remove();
+      dialogueElements = null;
+    }
+  }
+
   function bindCenterStage() {
     const shell = getCenterStageShell();
     if (!shell) {
@@ -632,7 +827,12 @@ const hammy = (function () {
     // why is this here?
     // shell.setAttribute('title', 'Play with Hammy');
     shell.addEventListener('click', () => {
-      if (!isMainMenuView() || centerStageActive) {
+      if (centerStageActive) {
+        openHammyDialogue();
+        return;
+      }
+
+      if (!isMainMenuView()) {
         return;
       }
 
