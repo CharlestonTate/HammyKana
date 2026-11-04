@@ -628,6 +628,36 @@ const hammy = (function () {
     return true;
   }
 
+  function placeDialogueAboveKeyboard() {
+    if (!dialogueElements) {
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    const keyboard = viewport
+      ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+      : 0;
+    dialogueElements.box.style.bottom = `${Math.max(16, keyboard + 12)}px`;
+  }
+
+  function watchDialogueViewport() {
+    placeDialogueAboveKeyboard();
+    if (!window.visualViewport || dialogueElements.watching) {
+      return;
+    }
+    dialogueElements.watching = true;
+    window.visualViewport.addEventListener('resize', placeDialogueAboveKeyboard);
+    window.visualViewport.addEventListener('scroll', placeDialogueAboveKeyboard);
+  }
+
+  function stopDialogueViewport() {
+    if (!window.visualViewport) {
+      return;
+    }
+    window.visualViewport.removeEventListener('resize', placeDialogueAboveKeyboard);
+    window.visualViewport.removeEventListener('scroll', placeDialogueAboveKeyboard);
+  }
+
   function parkHammyAboveDialogue() {
     if (!centerStageMovement) {
       return;
@@ -752,6 +782,7 @@ const hammy = (function () {
 
     if (!dialogueElements) {
       dialogueElements = buildHammyDialogue();
+      watchDialogueViewport();
       parkHammyAboveDialogue();
       dialogueBusy = true;
       await typeDialogueLine('Hey! What do you want to know?');
@@ -812,6 +843,7 @@ const hammy = (function () {
     }
     dialogueSkip = null;
     dialogueBusy = false;
+    stopDialogueViewport();
     if (dialogueElements) {
       dialogueElements.box.remove();
       dialogueElements = null;

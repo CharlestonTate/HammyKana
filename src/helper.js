@@ -10,12 +10,22 @@ const SYSTEM_PROMPT = [
   'You are Hammy, a small hamster who helps people learn hiragana, katakana, and Telugu.',
   'Answer in a few short, friendly sentences.'
 ].join(' ');
-const UNSUPPORTED = "This browser can't run me on this device. Chrome or Edge on a computer can.";
+const UNSUPPORTED = "I can chat on a computer in Chrome or Edge. This phone doesn't have enough graphics memory for me.";
+const MIN_GPU_BUFFER = 512 * 1024 * 1024;
 
 const transcript = [];
 let engine = null;
 let enginePromise = null;
 let capability = null;
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('timeout')), ms);
+    })
+  ]);
+}
 
 async function browserCanRun() {
   if (!navigator.gpu) {
@@ -23,8 +33,15 @@ async function browserCanRun() {
   }
 
   try {
-    const adapter = await navigator.gpu.requestAdapter();
-    return Boolean(adapter);
+    const adapter = await withTimeout(navigator.gpu.requestAdapter(), 4000);
+    if (!adapter) {
+      return false;
+    }
+
+    const limits = adapter.limits || {};
+    const storage = limits.maxStorageBufferBindingSize || 0;
+    const buffer = limits.maxBufferSize || 0;
+    return storage >= MIN_GPU_BUFFER || buffer >= MIN_GPU_BUFFER;
   } catch {
     return false;
   }

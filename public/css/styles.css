@@ -1598,7 +1598,6 @@ body.hammy-play-pen-active {
 body.hammy-center-stage-active {
   overflow: hidden;
   height: 100dvh;
-  touch-action: none;
 }
 
 body.hammy-center-stage-active .header,
@@ -1616,9 +1615,9 @@ body.hammy-center-stage-exiting .hammy-shell {
   top: 0;
   max-width: none;
   z-index: 500;
-  touch-action: none;
+  touch-action: manipulation;
   user-select: none;
-  cursor: grab;
+  cursor: pointer;
 }
 
 body.hammy-center-stage-active .hammy-shell.is-dragging,
@@ -1635,7 +1634,6 @@ body.hammy-center-stage-exiting .hammy-shell.is-free-roaming {
 body.hammy-center-stage-exiting {
   overflow: hidden;
   height: 100dvh;
-  touch-action: none;
 }
 
 body.hammy-center-stage-active .hammy-shell img,
@@ -1680,8 +1678,9 @@ body.hammy-center-stage-exiting .hammy-shell img {
   bottom: max(16px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 560;
-  width: min(640px, calc(100% - 32px));
+  width: min(640px, calc(100vw - 32px));
   padding: 28px 22px 18px;
+  touch-action: manipulation;
   border: 3px solid #3a3228;
   border-radius: 18px;
   background: #fffef8;
@@ -1730,6 +1729,7 @@ body.hammy-center-stage-exiting .hammy-shell img {
   background: transparent;
   color: var(--text);
   font: inherit;
+  font-size: 16px;
   padding: 0;
 }
 
